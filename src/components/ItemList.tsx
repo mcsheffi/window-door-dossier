@@ -14,15 +14,27 @@ interface ItemListProps {
 }
 
 const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemListProps) => {
+  const getWindowImage = (style: string) => {
+    // Using a placeholder image for now
+    return "/placeholder.svg";
+  };
+
   const renderItemDetails = (item: Item) => {
     if (item.type === 'window') {
       return (
-        <div className="grid grid-cols-5 gap-4">
-          <div>Color: {item.color}</div>
-          <div>Material: {item.material}</div>
-          <div>Width: {item.width}"</div>
-          <div>Height: {item.height}"</div>
-          <div>Style: {item.style}</div>
+        <div className="flex items-start gap-4">
+          <img 
+            src={getWindowImage(item.style)} 
+            alt={`${item.style} window`}
+            className="w-24 h-24 object-cover rounded-lg"
+          />
+          <div className="grid grid-cols-5 gap-4 flex-1">
+            <div>Color: {item.color}</div>
+            <div>Material: {item.material}</div>
+            <div>Width: {item.width}"</div>
+            <div>Height: {item.height}"</div>
+            <div>Style: {item.style}</div>
+          </div>
         </div>
       );
     } else {
