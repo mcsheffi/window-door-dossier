@@ -14,9 +14,51 @@ interface ItemListProps {
 }
 
 const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemListProps) => {
-  const getWindowImage = (style: string) => {
-    // Using a placeholder image for now
-    return "/placeholder.svg";
+  const getWindowImage = (style: string, subOption?: string) => {
+    // Using placeholder images based on style and sub-option
+    if (style === 'casement' && subOption) {
+      switch (subOption) {
+        case 'left':
+          return "/placeholder.svg"; // Replace with casement-left.jpg
+        case 'right':
+          return "/placeholder.svg"; // Replace with casement-right.jpg
+        case 'stationary':
+          return "/placeholder.svg"; // Replace with casement-stationary.jpg
+        default:
+          return "/placeholder.svg";
+      }
+    }
+
+    if (style === 'horizontal-roller' && subOption) {
+      switch (subOption) {
+        case 'left-active':
+          return "/placeholder.svg"; // Replace with roller-left.jpg
+        case 'right-active':
+          return "/placeholder.svg"; // Replace with roller-right.jpg
+        case 'three-panel':
+          return "/placeholder.svg"; // Replace with roller-three.jpg
+        default:
+          return "/placeholder.svg";
+      }
+    }
+
+    // Base window styles
+    switch (style) {
+      case 'single-hung':
+        return "/placeholder.svg"; // Replace with single-hung.jpg
+      case 'awning':
+        return "/placeholder.svg"; // Replace with awning.jpg
+      case 'casement':
+        return "/placeholder.svg"; // Replace with casement.jpg
+      case 'double-hung':
+        return "/placeholder.svg"; // Replace with double-hung.jpg
+      case 'fixed':
+        return "/placeholder.svg"; // Replace with fixed.jpg
+      case 'horizontal-roller':
+        return "/placeholder.svg"; // Replace with roller.jpg
+      default:
+        return "/placeholder.svg";
+    }
   };
 
   const renderItemDetails = (item: Item) => {
@@ -24,8 +66,8 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
       return (
         <div className="flex items-start gap-4">
           <img 
-            src={getWindowImage(item.style)} 
-            alt={`${item.style} window`}
+            src={getWindowImage(item.style, item.subOption)} 
+            alt={`${item.style} window ${item.subOption ? `(${item.subOption})` : ''}`}
             className="w-24 h-24 object-cover rounded-lg"
           />
           <div className="grid grid-cols-5 gap-4 flex-1">
@@ -33,7 +75,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
             <div>Material: {item.material}</div>
             <div>Width: {item.width}"</div>
             <div>Height: {item.height}"</div>
-            <div>Style: {item.style}</div>
+            <div>Style: {item.style}{item.subOption ? ` (${item.subOption})` : ''}</div>
           </div>
         </div>
       );
