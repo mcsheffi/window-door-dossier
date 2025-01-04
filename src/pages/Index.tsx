@@ -83,30 +83,43 @@ const Index = () => {
   };
 
   return (
-    <div className="container py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8 text-center">Window & Door Configurator</h1>
-      
-      <QuoteInfo
-        builderName={builderName}
-        jobName={jobName}
-        onBuilderNameChange={setBuilderName}
-        onJobNameChange={setJobName}
-      />
-      
-      <WindowConfigurator onAddWindow={handleAddWindow} />
-      <DoorConfigurator onAddDoor={handleAddDoor} />
-      
-      <ItemList
-        items={items}
-        onDeleteItem={handleDeleteItem}
-        onDuplicateItem={handleDuplicateItem}
-        onMoveItem={handleMoveItem}
-      />
-      
-      <div className="mt-6">
-        <Button onClick={handleSubmitOrder} className="w-full">
-          Submit Order
-        </Button>
+    <div className="min-h-screen bg-gray-900 py-8">
+      <div className="container max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8 text-center text-white">Window & Door Configurator</h1>
+        
+        <div className="space-y-6">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+            <QuoteInfo
+              builderName={builderName}
+              jobName={jobName}
+              onBuilderNameChange={setBuilderName}
+              onJobNameChange={setJobName}
+            />
+          </div>
+          
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+            <WindowConfigurator onAddWindow={handleAddWindow} />
+          </div>
+          
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+            <DoorConfigurator onAddDoor={handleAddDoor} />
+          </div>
+          
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+            <ItemList
+              items={items}
+              onDeleteItem={handleDeleteItem}
+              onDuplicateItem={handleDuplicateItem}
+              onMoveItem={handleMoveItem}
+            />
+          </div>
+        </div>
+        
+        <div className="mt-6">
+          <Button onClick={handleSubmitOrder} className="w-full bg-primary hover:bg-primary/90">
+            Submit Order
+          </Button>
+        </div>
       </div>
     </div>
   );
