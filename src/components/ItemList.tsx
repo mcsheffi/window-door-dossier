@@ -87,14 +87,14 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
   };
 
   return (
-    <Card>
+    <Card className="bg-charcoal text-charcoal-foreground">
       <CardHeader>
         <CardTitle>Item List</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {items.map((item, index) => (
-            <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+            <div key={index} className="flex items-center gap-4 p-4 border border-charcoal-foreground/20 rounded-lg bg-charcoal/50">
               <div className="flex-1">
                 <div className="font-semibold mb-2">{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</div>
                 {renderItemDetails(item)}
@@ -105,6 +105,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   size="icon"
                   onClick={() => onMoveItem(index, index - 1)}
                   disabled={index === 0}
+                  className="text-charcoal-foreground"
                 >
                   <MoveUp className="h-4 w-4" />
                 </Button>
@@ -113,6 +114,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   size="icon"
                   onClick={() => onMoveItem(index, index + 1)}
                   disabled={index === items.length - 1}
+                  className="text-charcoal-foreground"
                 >
                   <MoveDown className="h-4 w-4" />
                 </Button>
@@ -120,6 +122,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   variant="outline"
                   size="icon"
                   onClick={() => onDuplicateItem(index)}
+                  className="text-charcoal-foreground"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
@@ -134,7 +137,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
             </div>
           ))}
           {items.length === 0 && (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-charcoal-foreground/60 py-8">
               No items added yet. Use the configurators above to add windows or doors.
             </div>
           )}

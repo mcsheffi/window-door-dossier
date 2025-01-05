@@ -53,14 +53,14 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 bg-charcoal text-charcoal-foreground">
       <CardHeader>
         <CardTitle>Window Configurator</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="color">Window Color:</Label>
+            <Label htmlFor="color" className="text-charcoal-foreground">Window Color:</Label>
             <Select 
               name="color" 
               defaultValue="bronze"
@@ -81,12 +81,12 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           {showCustomColor && (
             <div className="space-y-2">
               <Label htmlFor="customColor">Custom Color:</Label>
-              <Input type="text" id="customColor" name="customColor" required placeholder="Enter custom color" />
+              <Input type="text" id="customColor" name="customColor" required placeholder="Enter custom color" className="bg-charcoal/50 text-charcoal-foreground" />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="material">Material:</Label>
+            <Label htmlFor="material" className="text-charcoal-foreground">Material:</Label>
             <Select name="material" defaultValue="aluminum">
               <SelectTrigger>
                 <SelectValue placeholder="Select material" />
@@ -100,17 +100,17 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="width">Width (in inches):</Label>
-            <Input type="number" id="width" name="width" required />
+            <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
+            <Input type="number" id="width" name="width" required className="bg-charcoal/50 text-charcoal-foreground" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="height">Height (in inches):</Label>
-            <Input type="number" id="height" name="height" required />
+            <Label htmlFor="height" className="text-charcoal-foreground">Height (in inches):</Label>
+            <Input type="number" id="height" name="height" required className="bg-charcoal/50 text-charcoal-foreground" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="style">Window Style:</Label>
+            <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
             <Select name="style" defaultValue="single-hung" onValueChange={handleStyleChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select style" />
@@ -128,7 +128,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
 
           {showSubOption && selectedStyle === 'casement' && (
             <div className="space-y-2">
-              <Label>Casement Option:</Label>
+              <Label className="text-charcoal-foreground">Casement Option:</Label>
               <RadioGroup defaultValue="left" name="subOption">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="left" id="left" />
@@ -148,7 +148,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
 
           {showSubOption && selectedStyle === 'horizontal-roller' && (
             <div className="space-y-2">
-              <Label>Roller Option:</Label>
+              <Label className="text-charcoal-foreground">Roller Option:</Label>
               <RadioGroup defaultValue="left-active" name="subOption">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="left-active" id="left-active" />

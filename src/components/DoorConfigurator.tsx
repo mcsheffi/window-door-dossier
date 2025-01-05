@@ -25,14 +25,14 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 bg-charcoal text-charcoal-foreground">
       <CardHeader>
         <CardTitle>Door Configurator</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="productNumber">Product #:</Label>
+            <Label htmlFor="productNumber" className="text-charcoal-foreground">Product #:</Label>
             <Select name="productNumber" defaultValue="TTS1003006FLCO">
               <SelectTrigger>
                 <SelectValue placeholder="Select product number" />
