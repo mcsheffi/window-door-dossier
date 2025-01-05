@@ -4,7 +4,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const session = useSession();
@@ -73,12 +73,17 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
-            onError={(error) => {
-              toast({
-                variant: "destructive",
-                title: "Authentication Error",
-                description: error.message || "An error occurred during authentication",
-              });
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: 'Email',
+                  password_label: 'Password',
+                  email_input_placeholder: 'Your email address',
+                  password_input_placeholder: 'Your password',
+                  button_label: 'Sign in',
+                  loading_button_label: 'Signing in ...',
+                },
+              },
             }}
           />
         </div>
