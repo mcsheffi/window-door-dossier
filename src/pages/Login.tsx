@@ -73,6 +73,13 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
+            onError={(error) => {
+              toast({
+                variant: "destructive",
+                title: "Authentication Error",
+                description: error.message || "An error occurred during authentication",
+              });
+            }}
           />
         </div>
       </div>
