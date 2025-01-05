@@ -4,16 +4,37 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (session) {
       navigate("/app");
     }
   }, [session, navigate]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        navigate("/app");
+      } else if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+        navigate("/login");
+      } else if (event === 'PASSWORD_RECOVERY') {
+        toast({
+          title: "Password Recovery",
+          description: "Please check your email for password reset instructions.",
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
@@ -47,6 +68,7 @@ const Login = () => {
                 button: 'w-full bg-primary hover:bg-primary/90 text-white rounded-md px-4 py-2',
                 input: 'w-full bg-gray-900 text-white border border-gray-700 rounded-md px-4 py-2',
                 label: 'text-sm font-medium text-gray-300',
+                message: 'text-sm text-red-500',
               },
             }}
             theme="dark"
