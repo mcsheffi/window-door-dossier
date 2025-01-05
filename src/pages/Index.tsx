@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSession } from "@supabase/auth-helpers-react";
 import { useState } from "react";
 import QuoteInfo from "@/components/QuoteInfo";
 import WindowConfigurator, { WindowConfig } from "@/components/WindowConfigurator";
@@ -5,14 +8,28 @@ import DoorConfigurator, { DoorConfig } from "@/components/DoorConfigurator";
 import ItemList from "@/components/ItemList";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type Item = WindowConfig | DoorConfig;
 
 const Index = () => {
+  const session = useSession();
+  const navigate = useNavigate();
   const [builderName, setBuilderName] = useState("");
   const [jobName, setJobName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!session) {
+      navigate("/login");
+    }
+  }, [session, navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   const handleAddWindow = (window: WindowConfig) => {
     setItems([...items, window]);
@@ -78,14 +95,22 @@ const Index = () => {
       title: "Order Submitted",
       description: "Your order has been submitted successfully!",
     });
-    // Here you would typically send the order to a backend
     console.log("Order submitted:", { builderName, jobName, items });
   };
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 py-8">
       <div className="container max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8 text-center text-white">Window & Door Configurator</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-white">Window & Door Configurator</h1>
+          <Button variant="outline" onClick={handleSignOut}>
+            Sign Out
+          </Button>
+        </div>
         
         <div className="space-y-6">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">

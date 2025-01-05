@@ -72,6 +72,7 @@ export type Database = {
           id: string
           jobName: string
           updatedAt: string
+          user_id: string | null
         }
         Insert: {
           builderName: string
@@ -79,6 +80,7 @@ export type Database = {
           id: string
           jobName: string
           updatedAt: string
+          user_id?: string | null
         }
         Update: {
           builderName?: string
@@ -86,6 +88,7 @@ export type Database = {
           id?: string
           jobName?: string
           updatedAt?: string
+          user_id?: string | null
         }
         Relationships: []
       }
