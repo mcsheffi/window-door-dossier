@@ -33,14 +33,19 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="productNumber" className="text-charcoal-foreground">Product #:</Label>
-            <Select name="productNumber" defaultValue="TTS1003006FLCO">
-              <SelectTrigger>
+            <Select name="productNumber" defaultValue="TTS1003068FLCO">
+              <SelectTrigger className="bg-charcoal/50 text-charcoal-foreground">
                 <SelectValue placeholder="Select product number" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TTS1003006FLCO">TTS1003006FLCO</SelectItem>
-                <SelectItem value="TTS2003006FLCO">TTS2003006FLCO</SelectItem>
-                <SelectItem value="TTS3003006FLCO">TTS3003006FLCO</SelectItem>
+                <SelectItem value="PP3080N90CI">PP3080N90CI - Plastpro 3080 Nova 90 White Fiberglass Clear Insulated Impact</SelectItem>
+                <SelectItem value="PP3068N90CI">PP3068N90CI - Plastpro 3068 Nova 90 White Fiberglass Clear Insulated Impact</SelectItem>
+                <SelectItem value="PP1080N90CI">PP1080N90CI - Plastpro 1080 Nova 90 White Fiberglass Clear Insulated Impact</SelectItem>
+                <SelectItem value="TTS1003068FLCO">TTS1003068FLCO - ThermaTru S100 - 3068 Flush Smooth Slab w/Full Lite Cut-Out</SelectItem>
+                <SelectItem value="TTS1002868FLCO">TTS1002868FLCO - ThermaTru S100 - 2868 Flush Smooth Slab w/Full Lite Cut-Out</SelectItem>
+                <SelectItem value="TTS1002668FLCO">TTS1002668FLCO - ThermaTru S100 - 2668 Flush Smooth Slab w/Full Lite Cut-Out</SelectItem>
+                <SelectItem value="TTS8313080">TTS8313080 - ThermaTru S831 - 3080 3 Panel Smooth Slab</SelectItem>
+                <SelectItem value="TTS81002880FLCO">TTS81002880FLCO - ThermaTru 2880 S8100 Flush Fiberglass Slab Full Lite Cut-Out</SelectItem>
               </SelectContent>
             </Select>
           </div>
