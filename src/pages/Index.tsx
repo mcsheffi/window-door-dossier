@@ -45,7 +45,7 @@ const Index = () => {
 
       if (quoteError) throw quoteError;
 
-      const { data: items, error: itemsError } = await supabase
+      const { data: orderItems, error: itemsError } = await supabase
         .from("OrderItem")
         .select("*")
         .eq("quoteId", id);
@@ -56,7 +56,29 @@ const Index = () => {
       setQuoteNumber(quote.quote_number);
       setBuilderName(quote.builderName);
       setJobName(quote.jobName);
-      setItems(items || []);
+
+      // Transform database items to match our Item type
+      const transformedItems: Item[] = orderItems?.map(item => ({
+        type: item.type as "window" | "door",
+        color: item.color || "",
+        customColor: item.customColor,
+        material: item.material || "",
+        width: String(item.width || ""),
+        height: String(item.height || ""),
+        style: item.style || "",
+        subOption: item.subStyle,
+        measurementGiven: "dlo", // Default value since it's required by WindowConfig
+        notes: "",
+        // Add door-specific fields if it's a door
+        ...(item.type === "door" && {
+          panelType: "single",
+          slabType: "flush",
+          hardwareType: "standard",
+          handing: "lh-in"
+        })
+      })) || [];
+
+      setItems(transformedItems);
     } catch (error) {
       console.error("Error loading quote:", error);
       toast({
@@ -90,15 +112,16 @@ const Index = () => {
       let currentQuoteId = quoteId;
 
       if (!currentQuoteId) {
+        const newQuoteId = crypto.randomUUID();
         const { data: quote, error: quoteError } = await supabase
           .from("Quote")
-          .insert([
-            {
-              builderName,
-              jobName,
-              user_id: session.user.id,
-            },
-          ])
+          .insert({
+            id: newQuoteId,
+            builderName,
+            jobName,
+            user_id: session.user.id,
+            updatedAt: new Date().toISOString(),
+          })
           .select()
           .single();
 
@@ -127,14 +150,23 @@ const Index = () => {
           .eq("quoteId", currentQuoteId);
 
         if (items.length > 0) {
+          const orderItems = items.map(item => ({
+            id: crypto.randomUUID(),
+            quoteId: currentQuoteId,
+            type: item.type,
+            color: item.color,
+            customColor: 'customColor' in item ? item.customColor : null,
+            material: item.material,
+            width: parseFloat(item.width),
+            height: parseFloat(item.height),
+            style: item.style,
+            subStyle: 'subOption' in item ? item.subOption : null,
+            updatedAt: new Date().toISOString(),
+          }));
+
           const { error: itemsError } = await supabase
             .from("OrderItem")
-            .insert(
-              items.map((item) => ({
-                ...item,
-                quoteId: currentQuoteId,
-              }))
-            );
+            .insert(orderItems);
 
           if (itemsError) throw itemsError;
         }
