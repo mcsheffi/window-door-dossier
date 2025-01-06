@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -98,9 +98,14 @@ const Index = () => {
           />
           <div className="w-full flex justify-between items-center">
             <h1 className="text-3xl font-bold text-white">Window & Door Configurator</h1>
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+            <div className="space-x-4">
+              <Button variant="outline" asChild>
+                <Link to="/">Dashboard</Link>
+              </Button>
+              <Button variant="outline" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
         
