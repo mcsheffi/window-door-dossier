@@ -59,6 +59,9 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       yPos = margin;
     }
 
+    // Calculate text width for details
+    const maxWidth = pageWidth - (2 * margin) - 35; // Adjusted width to account for image and margins
+
     // Add item background with rounded corners
     doc.setFillColor(245, 245, 245);
     doc.roundedRect(margin - 5, yPos - 5, pageWidth - (2 * margin) + 10, 60, 3, 3, 'F');
@@ -103,18 +106,22 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
         }
       }
 
-      // Split long text into multiple lines
-      const splitText = doc.splitTextToSize(details, pageWidth - (2 * margin) - 30);
+      // Split text into lines that fit within maxWidth
+      const splitText = doc.splitTextToSize(details, maxWidth);
       doc.text(splitText, margin + 30, yPos + 25);
 
+      // Adjust yPos based on the number of lines in splitText
+      const textHeight = splitText.length * 7; // Approximate height per line
+      
       // Add notes if present
       if (item.notes) {
-        yPos += (splitText.length * 12);
         const noteText = `Note: ${item.notes}`;
-        const splitNotes = doc.splitTextToSize(noteText, pageWidth - (2 * margin));
-        doc.text(splitNotes, margin, yPos + 20);
-        yPos += (splitNotes.length * 12);
+        const splitNotes = doc.splitTextToSize(noteText, maxWidth);
+        doc.text(splitNotes, margin, yPos + 25 + textHeight);
+        yPos += (splitNotes.length * 7); // Adjust for note height
       }
+
+      yPos += Math.max(70, textHeight + 30); // Ensure minimum spacing between items
 
     } catch (error) {
       console.error('Error loading image:', error);
@@ -122,11 +129,10 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
         ? `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`
         : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}`;
       
-      const splitText = doc.splitTextToSize(details, pageWidth - (2 * margin));
-      doc.text(splitText, margin, yPos + 20);
+      const splitText = doc.splitTextToSize(details, maxWidth);
+      doc.text(splitText, margin + 30, yPos + 25);
+      yPos += 70;
     }
-
-    yPos += 70; // Space for next item
   }
 
   return doc;
