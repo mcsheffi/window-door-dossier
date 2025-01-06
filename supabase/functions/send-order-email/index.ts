@@ -66,10 +66,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    const { error } = await supabase.auth.admin.sendRawEmail({
-      email: userEmail,
-      subject: `Order Details - ${jobName}`,
-      html: emailHtml,
+    // Use the correct method to send email
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        to: userEmail,
+        subject: `Order Details - ${jobName}`,
+        html: emailHtml,
+      },
     });
 
     if (error) {
