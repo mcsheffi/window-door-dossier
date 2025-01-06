@@ -60,7 +60,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     }
 
     // Calculate text width for details
-    const maxWidth = pageWidth - (2 * margin) - 35; // Adjusted width to account for image and margins
+    const maxWidth = pageWidth - (2 * margin) - 35;
 
     // Add item background with rounded corners
     doc.setFillColor(245, 245, 245);
@@ -71,18 +71,15 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     doc.setFont(undefined, 'bold');
     doc.text(`${index + 1}. ${capitalizeFirstLetter(item.type)}`, margin, yPos + 5);
     
-    // Add item image
     try {
       let imagePath = item.type === 'door' && item.door
         ? getDoorHandingImage(item.door.handing)
         : getWindowImage(item.style || '', item.subOption);
 
-      // Remove the leading slash from the path
       const cleanPath = imagePath.replace(/^\//, '');
       
       const img = new Image();
       img.src = cleanPath;
-      
       await new Promise<void>((resolve) => {
         img.onload = () => resolve();
       });
@@ -95,15 +92,14 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       let details = '';
       
       if (item.type === 'door' && item.door) {
-        details = `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`;
-        if (item.measurementGiven) {
-          details += ` - Measurement Given: ${item.measurementGiven.toUpperCase()}`;
-        }
+        details = `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
       } else {
-        details = `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}`;
-        if (item.measurementGiven) {
-          details += ` - Measurement Given: ${item.measurementGiven.toUpperCase()}`;
-        }
+        // Format window details in a single sentence with proper capitalization
+        const style = capitalizeFirstLetter(item.style || '');
+        const color = item.color ? capitalizeFirstLetter(item.color) : '';
+        const material = item.material ? capitalizeFirstLetter(item.material) : '';
+        
+        details = `${style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″${color ? `, ${color}` : ''}${material ? `, ${material}` : ''}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
       }
 
       // Split text into lines that fit within maxWidth
@@ -127,7 +123,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       console.error('Error loading image:', error);
       const details = item.type === 'door' && item.door
         ? `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`
-        : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}`;
+        : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${capitalizeFirstLetter(item.color || '')} ${capitalizeFirstLetter(item.material || '')}`;
       
       const splitText = doc.splitTextToSize(details, maxWidth);
       doc.text(splitText, margin + 30, yPos + 25);
