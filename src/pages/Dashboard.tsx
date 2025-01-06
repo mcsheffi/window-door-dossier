@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -62,12 +62,21 @@ const Dashboard = () => {
 
   const handleDeleteQuote = async (quoteId: string) => {
     try {
-      const { error } = await supabase
+      // First, delete all OrderItems associated with this quote
+      const { error: orderItemsError } = await supabase
+        .from("OrderItem")
+        .delete()
+        .eq('quoteId', quoteId);
+
+      if (orderItemsError) throw orderItemsError;
+
+      // Then, delete the quote itself
+      const { error: quoteError } = await supabase
         .from("Quote")
         .delete()
         .eq('id', quoteId);
 
-      if (error) throw error;
+      if (quoteError) throw quoteError;
 
       toast({
         title: "Success",
