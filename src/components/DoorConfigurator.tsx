@@ -20,11 +20,20 @@ export interface DoorConfig {
   measurementGiven: string;
   notes?: string;
   openingPhoto?: File;
+  // Add the missing properties
+  color?: string;
+  material?: string;
+  style?: string;
+  customColor?: string;
 }
 
 const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
   const [notes, setNotes] = useState<string>('');
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>('bronze');
+  const [selectedMaterial, setSelectedMaterial] = useState<string>('aluminum');
+  const [customColor, setCustomColor] = useState<string>('');
+  const [showCustomColor, setShowCustomColor] = useState(false);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -46,6 +55,11 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
       measurementGiven: formData.get('measurementGiven') as string,
       notes: notes || undefined,
       openingPhoto: openingPhoto || undefined,
+      // Add the new properties to the door object
+      color: selectedColor === 'custom' ? customColor : selectedColor,
+      material: selectedMaterial,
+      style: formData.get('slabType') as string, // Using slabType as style
+      customColor: selectedColor === 'custom' ? customColor : undefined,
     };
     onAddDoor(door);
     (e.target as HTMLFormElement).reset();
@@ -60,6 +74,61 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="color" className="text-charcoal-foreground">Door Color:</Label>
+            <Select 
+              name="color" 
+              value={selectedColor}
+              onValueChange={(value) => {
+                setSelectedColor(value);
+                setShowCustomColor(value === 'custom');
+              }}
+            >
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select color" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bronze">Bronze</SelectItem>
+                <SelectItem value="black">Black</SelectItem>
+                <SelectItem value="white">White</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {showCustomColor && (
+            <div className="space-y-2">
+              <Label htmlFor="customColor">Custom Color:</Label>
+              <Input 
+                type="text" 
+                id="customColor" 
+                value={customColor}
+                onChange={(e) => setCustomColor(e.target.value)}
+                required 
+                placeholder="Enter custom color" 
+                className="bg-[#403E43] text-charcoal-foreground" 
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="material" className="text-charcoal-foreground">Material:</Label>
+            <Select 
+              name="material" 
+              value={selectedMaterial}
+              onValueChange={setSelectedMaterial}
+            >
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select material" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="aluminum">Aluminum</SelectItem>
+                <SelectItem value="vinyl">Vinyl</SelectItem>
+                <SelectItem value="wood">Wood</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="panelType" className="text-charcoal-foreground">Panel Type:</Label>
             <Select name="panelType" defaultValue="single">
