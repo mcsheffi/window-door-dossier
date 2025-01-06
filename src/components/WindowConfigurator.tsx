@@ -23,12 +23,17 @@ export interface WindowConfig {
   measurementGiven: string;
   openingPhoto?: File;
   notes?: string;
+  // New door specific options
+  numberOfPanels?: string;
+  stackType?: string;
+  pocketType?: string;
 }
 
 const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [showCustomColor, setShowCustomColor] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>('single-hung');
   const [showSubOption, setShowSubOption] = useState(false);
+  const [showDoorOptions, setShowDoorOptions] = useState(false);
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('bronze');
   const [selectedMaterial, setSelectedMaterial] = useState<string>('aluminum');
@@ -39,6 +44,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
     setShowSubOption(value === 'casement' || value === 'horizontal-roller');
+    setShowDoorOptions(value === 'sliding-glass-door' || value === 'swing-door');
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,10 +68,14 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
       measurementGiven: formData.get('measurementGiven') as string,
       openingPhoto: openingPhoto || undefined,
       notes: notes || undefined,
+      numberOfPanels: formData.get('numberOfPanels') as string,
+      stackType: formData.get('stackType') as string,
+      pocketType: formData.get('pocketType') as string,
     };
     onAddWindow(window);
     (e.target as HTMLFormElement).reset();
     setShowSubOption(false);
+    setShowDoorOptions(false);
     setSelectedStyle('single-hung');
     setOpeningPhoto(null);
     setNotes('');
@@ -146,6 +156,8 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
                 <SelectItem value="double-hung">Double-Hung</SelectItem>
                 <SelectItem value="fixed">Fixed Window</SelectItem>
                 <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
+                <SelectItem value="sliding-glass-door">Sliding Glass Door</SelectItem>
+                <SelectItem value="swing-door">Swing Door</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -158,6 +170,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           <WindowStyleOptions
             selectedStyle={selectedStyle}
             showSubOption={showSubOption}
+            showDoorOptions={showDoorOptions}
           />
 
           <div className="space-y-2">
