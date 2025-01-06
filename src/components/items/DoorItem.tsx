@@ -6,17 +6,28 @@ interface DoorItemProps {
 }
 
 const DoorItem = ({ item, getDoorHandingImage }: DoorItemProps) => {
-  const capitalizeFirstLetter = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  const getHandingDisplayName = (handing: string) => {
+    switch (handing) {
+      case 'lh-in':
+        return 'Left Hand In-Swing';
+      case 'lh-out':
+        return 'Left Hand Out-Swing';
+      case 'rh-in':
+        return 'Right Hand In-Swing';
+      case 'rh-out':
+        return 'Right Hand Out-Swing';
+      default:
+        return handing;
+    }
   };
 
-  const details = `${capitalizeFirstLetter(item.panelType)} ${item.width}″×${item.height}″ ${item.handing} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+  const details = `${item.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.handing)} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
   
   return (
     <div className="flex items-start gap-4">
       <img 
         src={getDoorHandingImage(item.handing)} 
-        alt={`${item.handing} door`}
+        alt={`${getHandingDisplayName(item.handing)} door`}
         className="w-24 h-24 object-contain rounded-lg bg-white"
       />
       <div className="flex-1">
