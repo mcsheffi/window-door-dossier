@@ -74,7 +74,16 @@ const Index = () => {
     setItems(newItems);
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
+    if (!session?.user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit an order.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!builderName || !jobName) {
       toast({
         title: "Missing Information",
@@ -83,6 +92,7 @@ const Index = () => {
       });
       return;
     }
+
     if (items.length === 0) {
       toast({
         title: "Empty Order",
@@ -91,11 +101,47 @@ const Index = () => {
       });
       return;
     }
-    toast({
-      title: "Order Submitted",
-      description: "Your order has been submitted successfully!",
-    });
-    console.log("Order submitted:", { builderName, jobName, items });
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            userId: session.user.id,
+            userEmail: session.user.email,
+            builderName,
+            jobName,
+            items,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send order email");
+      }
+
+      toast({
+        title: "Order Submitted",
+        description: "Your order has been submitted and emailed to you. Please check your email and print to PDF.",
+      });
+
+      // Clear the form
+      setBuilderName("");
+      setJobName("");
+      setItems([]);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit order. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!session) {
@@ -105,11 +151,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-900 py-8">
       <div className="container max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Window & Door Configurator</h1>
-          <Button variant="outline" onClick={handleSignOut}>
-            Sign Out
-          </Button>
+        <div className="flex flex-col items-center mb-8">
+          <img
+            src="/lovable-uploads/ebeb244c-2956-4120-8334-dc0a4488607b.png"
+            alt="Bradley Building Products Logo"
+            className="h-24 mb-6"
+          />
+          <div className="w-full flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-white">Window & Door Configurator</h1>
+            <Button variant="outline" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </div>
         </div>
         
         <div className="space-y-6">
