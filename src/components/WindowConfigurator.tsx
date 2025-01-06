@@ -19,16 +19,25 @@ export interface WindowConfig {
   height: string;
   style: string;
   subOption?: string;
+  measurementGiven: string;
+  openingPhoto?: File;
 }
 
 const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [showCustomColor, setShowCustomColor] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>('single-hung');
   const [showSubOption, setShowSubOption] = useState(false);
+  const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
     setShowSubOption(value === 'casement' || value === 'horizontal-roller');
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setOpeningPhoto(e.target.files[0]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,12 +53,15 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
       height: formData.get('height') as string,
       style: formData.get('style') as string,
       subOption: formData.get('subOption') as string,
+      measurementGiven: formData.get('measurementGiven') as string,
+      openingPhoto: openingPhoto || undefined,
     };
     onAddWindow(window);
     (e.target as HTMLFormElement).reset();
     setShowCustomColor(false);
     setShowSubOption(false);
     setSelectedStyle('single-hung');
+    setOpeningPhoto(null);
   };
 
   return (
@@ -66,7 +78,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
               defaultValue="bronze"
               onValueChange={(value) => setShowCustomColor(value === 'custom')}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-[#403E43]">
                 <SelectValue placeholder="Select color" />
               </SelectTrigger>
               <SelectContent>
@@ -81,14 +93,14 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           {showCustomColor && (
             <div className="space-y-2">
               <Label htmlFor="customColor">Custom Color:</Label>
-              <Input type="text" id="customColor" name="customColor" required placeholder="Enter custom color" className="bg-charcoal/50 text-charcoal-foreground" />
+              <Input type="text" id="customColor" name="customColor" required placeholder="Enter custom color" className="bg-[#403E43] text-charcoal-foreground" />
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="material" className="text-charcoal-foreground">Material:</Label>
             <Select name="material" defaultValue="aluminum">
-              <SelectTrigger>
+              <SelectTrigger className="bg-[#403E43]">
                 <SelectValue placeholder="Select material" />
               </SelectTrigger>
               <SelectContent>
@@ -101,18 +113,34 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
-            <Input type="number" id="width" name="width" required className="bg-charcoal/50 text-charcoal-foreground" />
+            <Input type="number" id="width" name="width" required className="bg-[#403E43] text-charcoal-foreground" />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="height" className="text-charcoal-foreground">Height (in inches):</Label>
-            <Input type="number" id="height" name="height" required className="bg-charcoal/50 text-charcoal-foreground" />
+            <Input type="number" id="height" name="height" required className="bg-[#403E43] text-charcoal-foreground" />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="measurementGiven" className="text-charcoal-foreground">Measurement Given:</Label>
+            <Select name="measurementGiven" defaultValue="dlo">
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select measurement type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dlo">DLO</SelectItem>
+                <SelectItem value="rough">Rough Opening</SelectItem>
+                <SelectItem value="masonry">Masonry Opening</SelectItem>
+                <SelectItem value="frame">Frame Size</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
             <Select name="style" defaultValue="single-hung" onValueChange={handleStyleChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-[#403E43]">
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
@@ -165,6 +193,17 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
               </RadioGroup>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="openingPhoto" className="text-charcoal-foreground">Opening Photo (if Available):</Label>
+            <Input 
+              type="file" 
+              id="openingPhoto" 
+              accept="image/*" 
+              onChange={handlePhotoChange}
+              className="bg-[#403E43] text-charcoal-foreground"
+            />
+          </div>
 
           <Button type="submit" className="w-full">Add Window to List</Button>
         </form>
