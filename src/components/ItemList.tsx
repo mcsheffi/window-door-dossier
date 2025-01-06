@@ -64,25 +64,19 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
             alt={`${item.style} window ${item.subOption ? `(${item.subOption})` : ''}`}
             className="w-24 h-24 object-contain rounded-lg bg-white"
           />
-          <div className="grid grid-cols-5 gap-4 flex-1">
-            <div>Color: {item.color}</div>
-            <div>Material: {item.material}</div>
-            <div>Width: {item.width}"</div>
-            <div>Height: {item.height}"</div>
-            <div>Style: {item.style}{item.subOption ? ` (${item.subOption})` : ''}</div>
+          <div className="flex-1">
+            <div>
+              {item.style}{item.subOption ? ` (${item.subOption})` : ''} {item.width}″×{item.height}″ {item.color} {item.material}
+            </div>
           </div>
         </div>
       );
     } else {
       return (
-        <div className="grid grid-cols-4 gap-4">
-          <div>Width: {item.width}"</div>
-          <div>Height: {item.height}"</div>
-          <div>Handing: {item.handing}</div>
-          <div>Panel: {item.panelType}</div>
-          <div>Slab: {item.slabType}</div>
-          <div>Hardware: {item.hardwareType}</div>
-          <div>Measurement: {item.measurementGiven}</div>
+        <div className="flex-1">
+          <div>
+            {item.panelType} {item.width}″×{item.height}″ {item.handing} {item.slabType} {item.hardwareType} {item.measurementGiven}
+          </div>
         </div>
       );
     }
@@ -107,7 +101,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   size="icon"
                   onClick={() => onMoveItem(index, index - 1)}
                   disabled={index === 0}
-                  className="text-charcoal-foreground"
+                  className="text-black hover:text-black/80"
                 >
                   <MoveUp className="h-4 w-4" />
                 </Button>
@@ -116,7 +110,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   size="icon"
                   onClick={() => onMoveItem(index, index + 1)}
                   disabled={index === items.length - 1}
-                  className="text-charcoal-foreground"
+                  className="text-black hover:text-black/80"
                 >
                   <MoveDown className="h-4 w-4" />
                 </Button>
@@ -124,7 +118,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                   variant="outline"
                   size="icon"
                   onClick={() => onDuplicateItem(index)}
-                  className="text-charcoal-foreground"
+                  className="text-black hover:text-black/80"
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
