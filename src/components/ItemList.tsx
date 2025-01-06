@@ -18,6 +18,21 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
+  const getDoorHandingImage = (handing: string) => {
+    switch (handing) {
+      case 'lh-in':
+        return "/1p_LH_Inswing.jpg";
+      case 'lh-out':
+        return "/1p_LH_Outswing.jpg";
+      case 'rh-in':
+        return "/1p_RH_Inswing.jpg";
+      case 'rh-out':
+        return "/1p_RH_Outswing.jpg";
+      default:
+        return "/1p_LH_Inswing.jpg";
+    }
+  };
+
   const getWindowImage = (style: string, subOption?: string) => {
     if (style === 'casement' && subOption) {
       switch (subOption) {
@@ -79,8 +94,15 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
       const details = `${capitalizeFirstLetter(item.panelType)} ${item.width}″×${item.height}″ ${item.handing} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
       
       return (
-        <div className="flex-1">
-          <div>{details}</div>
+        <div className="flex items-start gap-4">
+          <img 
+            src={getDoorHandingImage(item.handing)} 
+            alt={`${item.handing} door`}
+            className="w-24 h-24 object-contain rounded-lg bg-white"
+          />
+          <div className="flex-1">
+            <div>{details}</div>
+          </div>
         </div>
       );
     }
@@ -99,7 +121,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
                 <div className="font-semibold mb-2">{capitalizeFirstLetter(item.type)}</div>
                 {renderItemDetails(item)}
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 justify-center">
                 <Button
                   variant="outline"
                   size="icon"

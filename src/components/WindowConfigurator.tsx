@@ -219,7 +219,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
             <Input 
               type="file" 
               id="openingPhoto" 
-              accept="image/*" 
+              accept="image/*;capture=camera"
               onChange={handlePhotoChange}
               className="bg-[#403E43] text-charcoal-foreground"
             />
