@@ -15,49 +15,43 @@ interface ItemListProps {
 
 const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemListProps) => {
   const getWindowImage = (style: string, subOption?: string) => {
-    // Using placeholder images based on style and sub-option
     if (style === 'casement' && subOption) {
       switch (subOption) {
         case 'left':
-          return "/placeholder.svg"; // Replace with casement-left.jpg
+          return "/lovable-uploads/b874a9fa-457e-4134-90fc-d460d91eb02d.png";
         case 'right':
-          return "/placeholder.svg"; // Replace with casement-right.jpg
+          return "/lovable-uploads/ec7ae7f2-7ff6-4e62-b330-480f955ac5c5.png";
         case 'stationary':
-          return "/placeholder.svg"; // Replace with casement-stationary.jpg
+          return "/lovable-uploads/78a3d360-4d9e-4e82-b1cc-10598861e547.png";
         default:
-          return "/placeholder.svg";
+          return "/lovable-uploads/78a3d360-4d9e-4e82-b1cc-10598861e547.png";
       }
     }
 
     if (style === 'horizontal-roller' && subOption) {
       switch (subOption) {
         case 'left-active':
-          return "/placeholder.svg"; // Replace with roller-left.jpg
+          return "/lovable-uploads/a7db2b78-c61d-4142-b7eb-04516c3ba179.png";
         case 'right-active':
-          return "/placeholder.svg"; // Replace with roller-right.jpg
+          return "/lovable-uploads/a7db2b78-c61d-4142-b7eb-04516c3ba179.png";
         case 'three-panel':
-          return "/placeholder.svg"; // Replace with roller-three.jpg
+          return "/lovable-uploads/a7db2b78-c61d-4142-b7eb-04516c3ba179.png";
         default:
-          return "/placeholder.svg";
+          return "/lovable-uploads/a7db2b78-c61d-4142-b7eb-04516c3ba179.png";
       }
     }
 
-    // Base window styles
     switch (style) {
       case 'single-hung':
-        return "/placeholder.svg"; // Replace with single-hung.jpg
+        return "/lovable-uploads/0ad439c6-c89a-43b1-966f-e77d73f5b7d2.png";
       case 'awning':
-        return "/placeholder.svg"; // Replace with awning.jpg
-      case 'casement':
-        return "/placeholder.svg"; // Replace with casement.jpg
+        return "/lovable-uploads/34071465-4922-47fe-986a-cf7b8b2346a2.png";
       case 'double-hung':
-        return "/placeholder.svg"; // Replace with double-hung.jpg
+        return "/lovable-uploads/943d87fa-a111-4221-bdc0-f75e8043c3ee.png";
       case 'fixed':
-        return "/placeholder.svg"; // Replace with fixed.jpg
-      case 'horizontal-roller':
-        return "/placeholder.svg"; // Replace with roller.jpg
+        return "/lovable-uploads/78a3d360-4d9e-4e82-b1cc-10598861e547.png";
       default:
-        return "/placeholder.svg";
+        return "/lovable-uploads/78a3d360-4d9e-4e82-b1cc-10598861e547.png";
     }
   };
 
@@ -68,7 +62,7 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
           <img 
             src={getWindowImage(item.style, item.subOption)} 
             alt={`${item.style} window ${item.subOption ? `(${item.subOption})` : ''}`}
-            className="w-24 h-24 object-cover rounded-lg"
+            className="w-24 h-24 object-contain rounded-lg bg-white"
           />
           <div className="grid grid-cols-5 gap-4 flex-1">
             <div>Color: {item.color}</div>

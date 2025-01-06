@@ -45,6 +45,35 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="panelType" className="text-charcoal-foreground">Panel Type:</Label>
+            <Select name="panelType" defaultValue="single">
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select panel type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">Single Panel</SelectItem>
+                <SelectItem value="double">2 Panel French</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="measurementGiven" className="text-charcoal-foreground">Measurement Given:</Label>
+            <Select name="measurementGiven" defaultValue="dlo">
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select measurement type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dlo">DLO</SelectItem>
+                <SelectItem value="rough">Rough Opening</SelectItem>
+                <SelectItem value="masonry">Masonry Opening</SelectItem>
+                <SelectItem value="frame">Frame Size</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
             <Input type="number" id="width" name="width" required className="bg-[#403E43] text-charcoal-foreground" />
           </div>
@@ -65,19 +94,6 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
                 <SelectItem value="rh-in">Right Hand In-Swing</SelectItem>
                 <SelectItem value="lh-out">Left Hand Out-Swing</SelectItem>
                 <SelectItem value="rh-out">Right Hand Out-Swing</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="panelType" className="text-charcoal-foreground">Panel Type:</Label>
-            <Select name="panelType" defaultValue="single">
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select panel type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Single Panel</SelectItem>
-                <SelectItem value="double">2 Panel French</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -106,22 +122,6 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
                 <SelectItem value="standard">Standard</SelectItem>
                 <SelectItem value="multipoint">Multi-Point</SelectItem>
                 <SelectItem value="panic">Panic</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="measurementGiven" className="text-charcoal-foreground">Measurement Given:</Label>
-            <Select name="measurementGiven" defaultValue="dlo">
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select measurement type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dlo">DLO</SelectItem>
-                <SelectItem value="rough">Rough Opening</SelectItem>
-                <SelectItem value="masonry">Masonry Opening</SelectItem>
-                <SelectItem value="frame">Frame Size</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
               </SelectContent>
             </Select>
           </div>

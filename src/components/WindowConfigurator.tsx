@@ -28,6 +28,9 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [selectedStyle, setSelectedStyle] = useState<string>('single-hung');
   const [showSubOption, setShowSubOption] = useState(false);
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>('bronze');
+  const [selectedMaterial, setSelectedMaterial] = useState<string>('aluminum');
+  const [customColor, setCustomColor] = useState<string>('');
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
@@ -43,12 +46,11 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const color = formData.get('color') as string;
     
     const window: WindowConfig = {
       type: 'window',
-      color: color === 'custom' ? formData.get('customColor') as string : color,
-      material: formData.get('material') as string,
+      color: selectedColor === 'custom' ? customColor : selectedColor,
+      material: selectedMaterial,
       width: formData.get('width') as string,
       height: formData.get('height') as string,
       style: formData.get('style') as string,
@@ -58,10 +60,10 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
     };
     onAddWindow(window);
     (e.target as HTMLFormElement).reset();
-    setShowCustomColor(false);
     setShowSubOption(false);
     setSelectedStyle('single-hung');
     setOpeningPhoto(null);
+    // Don't reset color and material as per requirement
   };
 
   return (
@@ -75,8 +77,11 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
             <Label htmlFor="color" className="text-charcoal-foreground">Window Color:</Label>
             <Select 
               name="color" 
-              defaultValue="bronze"
-              onValueChange={(value) => setShowCustomColor(value === 'custom')}
+              value={selectedColor}
+              onValueChange={(value) => {
+                setSelectedColor(value);
+                setShowCustomColor(value === 'custom');
+              }}
             >
               <SelectTrigger className="bg-[#403E43]">
                 <SelectValue placeholder="Select color" />
@@ -93,13 +98,25 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           {showCustomColor && (
             <div className="space-y-2">
               <Label htmlFor="customColor">Custom Color:</Label>
-              <Input type="text" id="customColor" name="customColor" required placeholder="Enter custom color" className="bg-[#403E43] text-charcoal-foreground" />
+              <Input 
+                type="text" 
+                id="customColor" 
+                value={customColor}
+                onChange={(e) => setCustomColor(e.target.value)}
+                required 
+                placeholder="Enter custom color" 
+                className="bg-[#403E43] text-charcoal-foreground" 
+              />
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="material" className="text-charcoal-foreground">Material:</Label>
-            <Select name="material" defaultValue="aluminum">
+            <Select 
+              name="material" 
+              value={selectedMaterial}
+              onValueChange={setSelectedMaterial}
+            >
               <SelectTrigger className="bg-[#403E43]">
                 <SelectValue placeholder="Select material" />
               </SelectTrigger>
@@ -112,13 +129,20 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
-            <Input type="number" id="width" name="width" required className="bg-[#403E43] text-charcoal-foreground" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="height" className="text-charcoal-foreground">Height (in inches):</Label>
-            <Input type="number" id="height" name="height" required className="bg-[#403E43] text-charcoal-foreground" />
+            <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
+            <Select name="style" value={selectedStyle} onValueChange={handleStyleChange}>
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single-hung">Single-Hung</SelectItem>
+                <SelectItem value="awning">Awning</SelectItem>
+                <SelectItem value="casement">Casement</SelectItem>
+                <SelectItem value="double-hung">Double-Hung</SelectItem>
+                <SelectItem value="fixed">Fixed Window</SelectItem>
+                <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -138,20 +162,13 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
-            <Select name="style" defaultValue="single-hung" onValueChange={handleStyleChange}>
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single-hung">Single-Hung</SelectItem>
-                <SelectItem value="awning">Awning</SelectItem>
-                <SelectItem value="casement">Casement</SelectItem>
-                <SelectItem value="double-hung">Double-Hung</SelectItem>
-                <SelectItem value="fixed">Fixed Window</SelectItem>
-                <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
+            <Input type="number" id="width" name="width" required className="bg-[#403E43] text-charcoal-foreground" />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="height" className="text-charcoal-foreground">Height (in inches):</Label>
+            <Input type="number" id="height" name="height" required className="bg-[#403E43] text-charcoal-foreground" />
           </div>
 
           {showSubOption && selectedStyle === 'casement' && (
