@@ -66,13 +66,11 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    // Send email using Supabase's built-in email functionality
-    const { error } = await supabase.auth.admin.createUser({
-      email: userEmail,
-      email_confirm: true,
-      user_metadata: {
-        orderEmail: true,
-      },
+    // Send email using Supabase's admin API
+    const { error } = await supabase.auth.admin.sendEmail(userEmail, {
+      template: 'custom',
+      subject: `Order Details - ${jobName}`,
+      html: emailHtml,
     });
 
     if (error) {
