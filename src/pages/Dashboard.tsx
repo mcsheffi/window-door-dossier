@@ -11,6 +11,8 @@ interface Quote {
   id: string;
   quote_number: number;
   createdAt: string;
+  builderName: string;
+  jobName: string;
   OrderItem: {
     type: string;
   }[];
@@ -39,6 +41,8 @@ const Dashboard = () => {
           id,
           quote_number,
           createdAt,
+          builderName,
+          jobName,
           OrderItem (
             type
           )
@@ -83,7 +87,6 @@ const Dashboard = () => {
         description: "Quote deleted successfully",
       });
 
-      // Refresh quotes list
       fetchQuotes();
     } catch (error) {
       console.error('Error deleting quote:', error);
@@ -153,11 +156,17 @@ const Dashboard = () => {
                     className="flex items-center justify-between bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors"
                   >
                     <div className="flex-1">
-                      <p className="text-white font-medium">
-                        Quote #{quote.quote_number}
-                      </p>
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <p className="text-white font-medium">
+                          {quote.builderName}
+                        </p>
+                        <span className="text-gray-400">-</span>
+                        <p className="text-white">
+                          {quote.jobName}
+                        </p>
+                      </div>
                       <p className="text-gray-400 text-sm">
-                        {format(new Date(quote.createdAt), 'MMM d, yyyy')}
+                        Quote #{quote.quote_number} - {format(new Date(quote.createdAt), 'MMM d, yyyy')}
                       </p>
                       <p className="text-gray-400 text-sm">
                         {windows} Windows, {doors} Doors
