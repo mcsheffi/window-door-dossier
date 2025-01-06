@@ -21,6 +21,7 @@ export interface WindowConfig {
   subOption?: string;
   measurementGiven: string;
   openingPhoto?: File;
+  notes?: string;
 }
 
 const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
@@ -31,6 +32,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [selectedColor, setSelectedColor] = useState<string>('bronze');
   const [selectedMaterial, setSelectedMaterial] = useState<string>('aluminum');
   const [customColor, setCustomColor] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
@@ -57,13 +59,14 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
       subOption: formData.get('subOption') as string,
       measurementGiven: formData.get('measurementGiven') as string,
       openingPhoto: openingPhoto || undefined,
+      notes: notes || undefined,
     };
     onAddWindow(window);
     (e.target as HTMLFormElement).reset();
     setShowSubOption(false);
     setSelectedStyle('single-hung');
     setOpeningPhoto(null);
-    // Don't reset color and material as per requirement
+    setNotes('');
   };
 
   return (
@@ -219,6 +222,18 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
               accept="image/*" 
               onChange={handlePhotoChange}
               className="bg-[#403E43] text-charcoal-foreground"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-charcoal-foreground">Notes:</Label>
+            <Input 
+              type="text" 
+              id="notes" 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any additional notes here" 
+              className="bg-[#403E43] text-charcoal-foreground" 
             />
           </div>
 

@@ -14,6 +14,10 @@ interface ItemListProps {
 }
 
 const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemListProps) => {
+  const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   const getWindowImage = (style: string, subOption?: string) => {
     if (style === 'casement' && subOption) {
       switch (subOption) {
@@ -57,6 +61,8 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
 
   const renderItemDetails = (item: Item) => {
     if (item.type === 'window') {
+      const details = `${capitalizeFirstLetter(item.style)}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+      
       return (
         <div className="flex items-start gap-4">
           <img 
@@ -65,18 +71,16 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
             className="w-24 h-24 object-contain rounded-lg bg-white"
           />
           <div className="flex-1">
-            <div>
-              {item.style}{item.subOption ? ` (${item.subOption})` : ''} {item.width}″×{item.height}″ {item.color} {item.material}
-            </div>
+            <div>{details}</div>
           </div>
         </div>
       );
     } else {
+      const details = `${capitalizeFirstLetter(item.panelType)} ${item.width}″×${item.height}″ ${item.handing} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+      
       return (
         <div className="flex-1">
-          <div>
-            {item.panelType} {item.width}″×{item.height}″ {item.handing} {item.slabType} {item.hardwareType} {item.measurementGiven}
-          </div>
+          <div>{details}</div>
         </div>
       );
     }
@@ -92,10 +96,10 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
           {items.map((item, index) => (
             <div key={index} className="flex items-center gap-4 p-4 border border-charcoal-foreground/20 rounded-lg bg-charcoal/50">
               <div className="flex-1">
-                <div className="font-semibold mb-2">{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</div>
+                <div className="font-semibold mb-2">{capitalizeFirstLetter(item.type)}</div>
                 {renderItemDetails(item)}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
                   size="icon"

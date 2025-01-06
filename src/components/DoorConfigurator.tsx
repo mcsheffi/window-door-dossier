@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 interface DoorConfiguratorProps {
   onAddDoor: (door: DoorConfig) => void;
@@ -17,9 +18,12 @@ export interface DoorConfig {
   slabType: string;
   hardwareType: string;
   measurementGiven: string;
+  notes?: string;
 }
 
 const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
+  const [notes, setNotes] = useState<string>('');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -32,9 +36,11 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
       slabType: formData.get('slabType') as string,
       hardwareType: formData.get('hardwareType') as string,
       measurementGiven: formData.get('measurementGiven') as string,
+      notes: notes || undefined,
     };
     onAddDoor(door);
     (e.target as HTMLFormElement).reset();
+    setNotes('');
   };
 
   return (
@@ -124,6 +130,18 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
                 <SelectItem value="panic">Panic</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-charcoal-foreground">Notes:</Label>
+            <Input 
+              type="text" 
+              id="notes" 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any additional notes here" 
+              className="bg-[#403E43] text-charcoal-foreground" 
+            />
           </div>
 
           <Button type="submit" className="w-full">Add Door to List</Button>
