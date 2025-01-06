@@ -20,10 +20,10 @@ export interface DoorConfig {
   measurementGiven: string;
   notes?: string;
   openingPhoto?: File;
-  // Add the missing properties
-  color?: string;
-  material?: string;
-  style?: string;
+  // Make these properties required since they're used in Index.tsx
+  color: string;
+  material: string;
+  style: string;
   customColor?: string;
 }
 
