@@ -66,11 +66,16 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    // Send email using Supabase's admin API
-    const { error } = await supabase.auth.admin.sendEmail(userEmail, {
-      template: 'custom',
-      subject: `Order Details - ${jobName}`,
-      html: emailHtml,
+    // Generate a magic link that will contain our email content
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userEmail,
+      options: {
+        data: {
+          subject: `Order Details - ${jobName}`,
+          content: emailHtml,
+        },
+      },
     });
 
     if (error) {
