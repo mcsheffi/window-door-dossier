@@ -16,7 +16,7 @@ function App() {
         />
         <Route 
           path="/login" 
-          element={!session ? <Login /> : <Navigate to="/app" replace />} 
+          element={!session ? <Login /> : <Navigate to="/" replace />} 
         />
         <Route 
           path="/" 

@@ -13,14 +13,14 @@ const Login = () => {
 
   useEffect(() => {
     if (session) {
-      navigate("/app");
+      navigate("/");
     }
   }, [session, navigate]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate("/app");
+        navigate("/");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
       } else if (event === 'PASSWORD_RECOVERY') {
@@ -73,7 +73,7 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
-            redirectTo={window.location.origin + "/app"}
+            redirectTo={window.location.origin + "/"}
             localization={{
               variables: {
                 sign_in: {
