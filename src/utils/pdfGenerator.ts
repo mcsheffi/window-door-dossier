@@ -53,7 +53,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
   yPos += 45;
 
   // Add items with numbering
-  items.forEach((item, index) => {
+  for (const [index, item] of items.entries()) {
     if (yPos > doc.internal.pageSize.height - 40) {
       doc.addPage();
       yPos = margin;
@@ -79,8 +79,9 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       
       const img = new Image();
       img.src = cleanPath;
-      await new Promise((resolve) => {
-        img.onload = resolve;
+      
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
       });
       
       doc.addImage(img, 'PNG', margin, yPos + 10, 24, 24);
@@ -126,7 +127,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     }
 
     yPos += 70; // Space for next item
-  });
+  }
 
   return doc;
 };
