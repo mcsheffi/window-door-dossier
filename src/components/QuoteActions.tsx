@@ -72,12 +72,12 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     if (!validateQuoteData()) return;
 
     try {
-      // Generate and download PDF
-      const pdf = generateOrderPDF(builderName, jobName, items);
+      // Generate and download PDF - now properly awaiting the Promise
+      const pdf = await generateOrderPDF(builderName, jobName, items);
       pdf.save(`${jobName.replace(/\s+/g, '_')}_order.pdf`);
 
       toast({
