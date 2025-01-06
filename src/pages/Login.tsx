@@ -19,7 +19,7 @@ const Login = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && session) {
         navigate("/app");
       } else if (event === 'SIGNED_OUT') {
         navigate("/login");
@@ -73,6 +73,7 @@ const Login = () => {
             }}
             theme="dark"
             providers={[]}
+            redirectTo={window.location.origin + "/app"}
             localization={{
               variables: {
                 sign_in: {
