@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from 'uuid';
-import jsPDF from 'jspdf';
+import { saveQuote, submitOrder } from "@/services/quoteService";
+import { generateOrderPDF } from "@/utils/pdfGenerator";
 
 interface QuoteActionsProps {
   builderName: string;
@@ -15,71 +14,47 @@ interface QuoteActionsProps {
 const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: QuoteActionsProps) => {
   const { toast } = useToast();
 
-  const handleSaveQuote = async () => {
+  const validateQuoteData = () => {
     if (!session?.user) {
       toast({
         title: "Error",
-        description: "You must be logged in to save a quote.",
+        description: "You must be logged in to perform this action.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (!builderName || !jobName) {
       toast({
         title: "Missing Information",
-        description: "Please fill in both Builder Name and Job Name before saving.",
+        description: "Please fill in both Builder Name and Job Name.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (items.length === 0) {
       toast({
         title: "Empty Quote",
-        description: "Please add at least one window or door to your quote before saving.",
+        description: "Please add at least one window or door to your quote.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
+    return true;
+  };
+
+  const handleSaveQuote = async () => {
+    if (!validateQuoteData()) return;
+
     try {
-      const quoteId = uuidv4();
-      const now = new Date().toISOString();
-
-      const { data: quote, error: quoteError } = await supabase
-        .from("Quote")
-        .insert({
-          id: quoteId,
-          builderName,
-          jobName,
-          user_id: session.user.id,
-          updatedAt: now,
-        })
-        .select()
-        .single();
-
-      if (quoteError) throw quoteError;
-
-      const itemsWithQuoteId = items.map((item) => ({
-        id: uuidv4(),
-        quoteId: quote.id,
-        type: 'door' in item ? 'door' : 'window',
-        width: item.width,
-        height: item.height,
-        style: 'door' in item ? item.panelType : item.style,
-        subStyle: 'door' in item ? item.handing : item.subOption,
-        material: item.material || null,
-        color: item.color || null,
-        productNumber: null,
-        updatedAt: now,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from("OrderItem")
-        .insert(itemsWithQuoteId);
-
-      if (itemsError) throw itemsError;
+      const quote = await saveQuote({
+        builderName,
+        jobName,
+        items,
+        userId: session.user.id,
+      });
 
       toast({
         title: "Quote Saved",
@@ -97,98 +72,20 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
   };
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    const margin = 20;
-    let yPos = margin;
-
-    // Add title
-    doc.setFontSize(20);
-    doc.text('Order Details', margin, yPos);
-    yPos += 15;
-
-    // Add builder and job info
-    doc.setFontSize(12);
-    doc.text(`Builder Name: ${builderName}`, margin, yPos);
-    yPos += 10;
-    doc.text(`Job Name: ${jobName}`, margin, yPos);
-    yPos += 15;
-
-    // Add items
-    items.forEach((item, index) => {
-      if (yPos > 270) { // Check if we need a new page
-        doc.addPage();
-        yPos = margin;
-      }
-
-      let details = '';
-      if ('door' in item) {
-        details = `Door: ${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType}`;
-      } else {
-        details = `Window: ${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}`;
-      }
-
-      // Split long text into multiple lines
-      const splitText = doc.splitTextToSize(details, 170);
-      doc.text(splitText, margin, yPos);
-      yPos += (splitText.length * 7);
-
-      if (item.notes) {
-        const noteText = `Note: ${item.notes}`;
-        const splitNotes = doc.splitTextToSize(noteText, 170);
-        doc.text(splitNotes, margin, yPos);
-        yPos += (splitNotes.length * 7);
-      }
-
-      yPos += 5; // Add space between items
-    });
-
-    return doc;
-  };
-
   const handleSubmitOrder = async () => {
-    if (!session?.user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to submit an order.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!builderName || !jobName) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both Builder Name and Job Name before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items.length === 0) {
-      toast({
-        title: "Empty Order",
-        description: "Please add at least one window or door to your order before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!validateQuoteData()) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-order-email', {
-        body: {
-          userId: session.user.id,
-          userEmail: session.user.email,
-          builderName,
-          jobName,
-          items,
-        },
-      });
-
-      if (error) throw error;
+      await submitOrder(
+        session.user.id,
+        session.user.email,
+        builderName,
+        jobName,
+        items
+      );
 
       // Generate and download PDF
-      const pdf = generatePDF();
+      const pdf = generateOrderPDF(builderName, jobName, items);
       pdf.save(`${jobName.replace(/\s+/g, '_')}_order.pdf`);
 
       toast({
