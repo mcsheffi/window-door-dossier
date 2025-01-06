@@ -21,7 +21,7 @@ const DoorItem = ({ item, getDoorHandingImage }: DoorItemProps) => {
     }
   };
 
-  const details = `${item.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.handing)} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+  const details = `${item.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.handing)} ${item.slabType} ${item.hardwareType} - Measurement Given: ${item.measurementGiven?.toUpperCase()}${item.notes ? ` - Note: ${item.notes}` : ''}`;
   
   return (
     <div className="flex items-start gap-4">

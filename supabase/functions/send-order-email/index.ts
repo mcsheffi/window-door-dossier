@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,29 +10,28 @@ const corsHeaders = {
 
 interface OrderEmailRequest {
   userId: string;
+  userEmail: string;
   builderName: string;
   jobName: string;
   items: any[];
-  userEmail: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { userId, builderName, jobName, items, userEmail }: OrderEmailRequest = await req.json();
+    const { userEmail, builderName, jobName, items }: OrderEmailRequest = await req.json();
 
-    // Generate HTML content for the email
+    // Generate HTML content for items
     const itemsHtml = items.map((item) => {
-      let details = "";
-      if (item.type === "window") {
-        details = `${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+      if ('door' in item) {
+        return `<li>Door: ${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType} - Measurement Given: ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}</li>`;
       } else {
-        details = `${item.panelType} ${item.width}″×${item.height}″ ${item.handing} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+        return `<li>Window: ${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material} - Measurement Given: ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}</li>`;
       }
-      return `<li>${item.type.charAt(0).toUpperCase() + item.type.slice(1)}: ${details}</li>`;
     }).join("");
 
     const emailHtml = `
@@ -68,10 +64,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to send email: ${await res.text()}`);
+      const error = await res.text();
+      console.error("Resend API error:", error);
+      throw new Error(error);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    const data = await res.json();
+    return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

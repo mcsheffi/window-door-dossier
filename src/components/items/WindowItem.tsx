@@ -10,7 +10,7 @@ const WindowItem = ({ item, getWindowImage }: WindowItemProps) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  const details = `${capitalizeFirstLetter(item.style)}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}${item.notes ? ` - Note: ${item.notes}` : ''}`;
+  const details = `${capitalizeFirstLetter(item.style)}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material} - Measurement Given: ${item.measurementGiven?.toUpperCase()}${item.notes ? ` - Note: ${item.notes}` : ''}`;
   
   return (
     <div className="flex items-start gap-4">

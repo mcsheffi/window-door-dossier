@@ -125,27 +125,17 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            userId: session.user.id,
-            userEmail: session.user.email,
-            builderName,
-            jobName,
-            items,
-          }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('send-order-email', {
+        body: {
+          userId: session.user.id,
+          userEmail: session.user.email,
+          builderName,
+          jobName,
+          items,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to send order email");
-      }
+      if (error) throw error;
 
       toast({
         title: "Order Submitted",
