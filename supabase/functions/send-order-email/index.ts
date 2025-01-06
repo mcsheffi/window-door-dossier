@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +19,57 @@ interface OrderEmailRequest {
   items: any[];
 }
 
+const generateOrderHTML = (builderName: string, jobName: string, items: any[]) => {
+  const itemsHtml = items.map((item) => {
+    if ('door' in item) {
+      return `<tr>
+        <td>Door</td>
+        <td>${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType}</td>
+        <td>${item.measurementGiven}</td>
+        <td>${item.notes || '-'}</td>
+      </tr>`;
+    } else {
+      return `<tr>
+        <td>Window</td>
+        <td>${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}</td>
+        <td>${item.measurementGiven}</td>
+        <td>${item.notes || '-'}</td>
+      </tr>`;
+    }
+  }).join("");
+
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <h1>Order Details</h1>
+        <p><strong>Builder Name:</strong> ${builderName}</p>
+        <p><strong>Job Name:</strong> ${jobName}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Details</th>
+              <th>Measurement</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -26,31 +80,9 @@ const handler = async (req: Request): Promise<Response> => {
     const { userEmail, builderName, jobName, items }: OrderEmailRequest = await req.json();
     console.log("Received request:", { userEmail, builderName, jobName, items });
 
-    // Generate HTML content for items
-    const itemsHtml = items.map((item) => {
-      if ('door' in item) {
-        return `<li>Door: ${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType} - Measurement Given: ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}</li>`;
-      } else {
-        return `<li>Window: ${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material} - Measurement Given: ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}</li>`;
-      }
-    }).join("");
+    const htmlContent = generateOrderHTML(builderName, jobName, items);
 
-    const emailHtml = `
-      <html>
-        <body>
-          <h1>Order Details</h1>
-          <p><strong>Builder Name:</strong> ${builderName}</p>
-          <p><strong>Job Name:</strong> ${jobName}</p>
-          <h2>Items:</h2>
-          <ul>
-            ${itemsHtml}
-          </ul>
-          <p>Please print this email to PDF for your records.</p>
-        </body>
-      </html>
-    `;
-
-    console.log("Sending email to:", userEmail);
+    // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -61,7 +93,13 @@ const handler = async (req: Request): Promise<Response> => {
         from: "micah@bradley.build",
         to: [userEmail],
         subject: `Order Details - ${jobName}`,
-        html: emailHtml,
+        html: htmlContent,
+        attachments: [
+          {
+            filename: `${jobName.replace(/\s+/g, '_')}_order.html`,
+            content: Buffer.from(htmlContent).toString('base64'),
+          },
+        ],
       }),
     });
 

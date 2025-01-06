@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
+import jsPDF from 'jspdf';
 
 interface QuoteActionsProps {
   builderName: string;
@@ -96,6 +97,55 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
   };
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const margin = 20;
+    let yPos = margin;
+
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Order Details', margin, yPos);
+    yPos += 15;
+
+    // Add builder and job info
+    doc.setFontSize(12);
+    doc.text(`Builder Name: ${builderName}`, margin, yPos);
+    yPos += 10;
+    doc.text(`Job Name: ${jobName}`, margin, yPos);
+    yPos += 15;
+
+    // Add items
+    items.forEach((item, index) => {
+      if (yPos > 270) { // Check if we need a new page
+        doc.addPage();
+        yPos = margin;
+      }
+
+      let details = '';
+      if ('door' in item) {
+        details = `Door: ${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType}`;
+      } else {
+        details = `Window: ${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}`;
+      }
+
+      // Split long text into multiple lines
+      const splitText = doc.splitTextToSize(details, 170);
+      doc.text(splitText, margin, yPos);
+      yPos += (splitText.length * 7);
+
+      if (item.notes) {
+        const noteText = `Note: ${item.notes}`;
+        const splitNotes = doc.splitTextToSize(noteText, 170);
+        doc.text(splitNotes, margin, yPos);
+        yPos += (splitNotes.length * 7);
+      }
+
+      yPos += 5; // Add space between items
+    });
+
+    return doc;
+  };
+
   const handleSubmitOrder = async () => {
     if (!session?.user) {
       toast({
@@ -137,9 +187,13 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
 
       if (error) throw error;
 
+      // Generate and download PDF
+      const pdf = generatePDF();
+      pdf.save(`${jobName.replace(/\s+/g, '_')}_order.pdf`);
+
       toast({
         title: "Order Submitted",
-        description: "Your order has been submitted and emailed to you. Please check your email and print to PDF.",
+        description: "Your order has been submitted and emailed to you. The PDF has been downloaded to your device.",
       });
     } catch (error) {
       console.error("Error submitting order:", error);
