@@ -24,6 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { userEmail, builderName, jobName, items }: OrderEmailRequest = await req.json();
+    console.log("Received request:", { userEmail, builderName, jobName, items });
 
     // Generate HTML content for items
     const itemsHtml = items.map((item) => {
@@ -49,6 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
+    console.log("Sending email to:", userEmail);
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -56,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Bradley Building Products <onboarding@resend.dev>",
+        from: "micah@bradley.build",
         to: [userEmail],
         subject: `Order Details - ${jobName}`,
         html: emailHtml,
@@ -70,6 +72,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const data = await res.json();
+    console.log("Email sent successfully:", data);
+
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
