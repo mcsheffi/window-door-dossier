@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import QuoteInfo from "@/components/QuoteInfo";
 import WindowConfigurator, { WindowConfig } from "@/components/WindowConfigurator";
 import DoorConfigurator, { DoorConfig } from "@/components/DoorConfigurator";
@@ -13,6 +15,7 @@ type Item = WindowConfig | DoorConfig;
 const Index = () => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [builderName, setBuilderName] = useState("");
   const [jobName, setJobName] = useState("");
   const [items, setItems] = useState<Item[]>([]);

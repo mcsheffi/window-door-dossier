@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
 
 interface QuoteActionsProps {
   builderName: string;
@@ -42,21 +43,25 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
 
     try {
+      const quoteId = uuidv4();
+      const now = new Date().toISOString();
+
       const { data: quote, error: quoteError } = await supabase
         .from("Quote")
-        .insert([
-          {
-            builderName,
-            jobName,
-            user_id: session.user.id,
-          },
-        ])
+        .insert({
+          id: quoteId,
+          builderName,
+          jobName,
+          user_id: session.user.id,
+          updatedAt: now,
+        })
         .select()
         .single();
 
       if (quoteError) throw quoteError;
 
       const itemsWithQuoteId = items.map((item) => ({
+        id: uuidv4(),
         quoteId: quote.id,
         type: 'door' in item ? 'door' : 'window',
         width: item.width,
@@ -66,6 +71,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
         material: item.material || null,
         color: item.color || null,
         productNumber: null,
+        updatedAt: now,
       }));
 
       const { error: itemsError } = await supabase
