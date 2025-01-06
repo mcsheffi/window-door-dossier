@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { saveQuote, submitOrder } from "@/services/quoteService";
+import { saveQuote } from "@/services/quoteService";
 import { generateOrderPDF } from "@/utils/pdfGenerator";
 
 interface QuoteActionsProps {
@@ -72,31 +72,23 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     }
   };
 
-  const handleSubmitOrder = async () => {
+  const handleSubmitOrder = () => {
     if (!validateQuoteData()) return;
 
     try {
-      await submitOrder(
-        session.user.id,
-        session.user.email,
-        builderName,
-        jobName,
-        items
-      );
-
       // Generate and download PDF
       const pdf = generateOrderPDF(builderName, jobName, items);
       pdf.save(`${jobName.replace(/\s+/g, '_')}_order.pdf`);
 
       toast({
-        title: "Order Submitted",
-        description: "Your order has been submitted and emailed to you. The PDF has been downloaded to your device.",
+        title: "Order Generated",
+        description: "Your order PDF has been downloaded to your device.",
       });
     } catch (error) {
-      console.error("Error submitting order:", error);
+      console.error("Error generating order:", error);
       toast({
         title: "Error",
-        description: "Failed to submit order. Please try again.",
+        description: "Failed to generate order PDF. Please try again.",
         variant: "destructive",
       });
     }

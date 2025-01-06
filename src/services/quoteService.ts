@@ -48,23 +48,3 @@ export const saveQuote = async ({ builderName, jobName, items, userId }: SaveQuo
 
   return quote;
 };
-
-export const submitOrder = async (
-  userId: string,
-  userEmail: string,
-  builderName: string,
-  jobName: string,
-  items: any[]
-) => {
-  const { error } = await supabase.functions.invoke('send-order-email', {
-    body: {
-      userId,
-      userEmail,
-      builderName,
-      jobName,
-      items,
-    },
-  });
-
-  if (error) throw error;
-};
