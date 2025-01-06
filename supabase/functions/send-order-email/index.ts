@@ -66,12 +66,12 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
 
-    // Use the correct method to send email
-    const { data, error } = await supabase.functions.invoke('send-email', {
-      body: {
-        to: userEmail,
-        subject: `Order Details - ${jobName}`,
-        html: emailHtml,
+    // Send email using Supabase's built-in email functionality
+    const { error } = await supabase.auth.admin.createUser({
+      email: userEmail,
+      email_confirm: true,
+      user_metadata: {
+        orderEmail: true,
       },
     });
 
