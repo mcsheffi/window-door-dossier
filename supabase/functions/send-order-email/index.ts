@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,28 +8,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface OrderEmailRequest {
-  userId: string;
-  userEmail: string;
-  builderName: string;
-  jobName: string;
-  items: any[];
-}
-
 const generateOrderHTML = (builderName: string, jobName: string, items: any[]) => {
   const itemsHtml = items.map((item) => {
     if ('door' in item) {
       return `<tr>
         <td>Door</td>
         <td>${item.panelType} ${item.width}″×${item.height}″ - ${item.handing} ${item.slabType} ${item.hardwareType}</td>
-        <td>${item.measurementGiven}</td>
         <td>${item.notes || '-'}</td>
       </tr>`;
     } else {
       return `<tr>
         <td>Window</td>
         <td>${item.style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}</td>
-        <td>${item.measurementGiven}</td>
         <td>${item.notes || '-'}</td>
       </tr>`;
     }
@@ -57,7 +44,6 @@ const generateOrderHTML = (builderName: string, jobName: string, items: any[]) =
             <tr>
               <th>Type</th>
               <th>Details</th>
-              <th>Measurement</th>
               <th>Notes</th>
             </tr>
           </thead>
@@ -77,10 +63,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { userEmail, builderName, jobName, items }: OrderEmailRequest = await req.json();
+    const { userEmail, builderName, jobName, items } = await req.json();
     console.log("Received request:", { userEmail, builderName, jobName, items });
 
     const htmlContent = generateOrderHTML(builderName, jobName, items);
+    const encoder = new TextEncoder();
+    const htmlBytes = encoder.encode(htmlContent);
+    const base64Html = btoa(String.fromCharCode(...htmlBytes));
 
     // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
@@ -97,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
         attachments: [
           {
             filename: `${jobName.replace(/\s+/g, '_')}_order.html`,
-            content: Buffer.from(htmlContent).toString('base64'),
+            content: base64Html,
           },
         ],
       }),
@@ -119,8 +108,8 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error("Error in send-order-email function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 };
