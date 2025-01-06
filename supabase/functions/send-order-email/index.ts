@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,45 +65,43 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
+
     const { userEmail, builderName, jobName, items } = await req.json();
     console.log("Received request:", { userEmail, builderName, jobName, items });
 
     const htmlContent = generateOrderHTML(builderName, jobName, items);
-    const encoder = new TextEncoder();
-    const htmlBytes = encoder.encode(htmlContent);
-    const base64Html = btoa(String.fromCharCode(...htmlBytes));
 
-    // Send email using Resend
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "micah@bradley.build",
-        to: [userEmail],
+    // Send email using Supabase SMTP
+    const { error } = await supabase.auth.admin.sendEmail(
+      userEmail,
+      {
         subject: `Order Details - ${jobName}`,
-        html: htmlContent,
-        attachments: [
-          {
-            filename: `${jobName.replace(/\s+/g, '_')}_order.html`,
-            content: base64Html,
-          },
-        ],
-      }),
-    });
+        template_name: 'order-details',
+        template_data: {
+          builderName,
+          jobName,
+          content: htmlContent,
+        }
+      }
+    );
 
-    if (!res.ok) {
-      const error = await res.text();
-      console.error("Resend API error:", error);
-      throw new Error(error);
+    if (error) {
+      console.error("Error sending email:", error);
+      throw error;
     }
 
-    const data = await res.json();
-    console.log("Email sent successfully:", data);
-
-    return new Response(JSON.stringify(data), {
+    console.log("Email sent successfully");
+    return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
