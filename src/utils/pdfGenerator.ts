@@ -92,14 +92,14 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       let details = '';
       
       if (item.type === 'door' && item.door) {
-        details = `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
+        details = `${item.door.panelType} ${item.width}×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
       } else {
         // Format window details in a single sentence with proper capitalization
         const style = capitalizeFirstLetter(item.style || '');
         const color = item.color ? capitalizeFirstLetter(item.color) : '';
         const material = item.material ? capitalizeFirstLetter(item.material) : '';
         
-        details = `${style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″${color ? `, ${color}` : ''}${material ? `, ${material}` : ''}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
+        details = `${style}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}×${item.height}″${color ? `, ${color}` : ''}${material ? `, ${material}` : ''}${item.measurementGiven ? ` - Measurement Given: ${item.measurementGiven.toUpperCase()}` : ''}`;
       }
 
       // Split text into lines that fit within maxWidth
@@ -122,8 +122,8 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     } catch (error) {
       console.error('Error loading image:', error);
       const details = item.type === 'door' && item.door
-        ? `${item.door.panelType} ${item.width}″×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`
-        : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${capitalizeFirstLetter(item.color || '')} ${capitalizeFirstLetter(item.material || '')}`;
+        ? `${item.door.panelType} ${item.width}×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`
+        : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}×${item.height}″ ${capitalizeFirstLetter(item.color || '')} ${capitalizeFirstLetter(item.material || '')}`;
       
       const splitText = doc.splitTextToSize(details, maxWidth);
       doc.text(splitText, margin + 30, yPos + 25);
