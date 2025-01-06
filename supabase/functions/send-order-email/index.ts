@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const POSTMARK_API_KEY = Deno.env.get("POSTMARK_API_KEY");
+const POSTMARK_API_URL = "https://api.postmarkapp.com/email";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,53 +63,62 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const supabase = createClient(
-      SUPABASE_URL!,
-      SUPABASE_SERVICE_ROLE_KEY!,
+  if (!POSTMARK_API_KEY) {
+    console.error("Missing POSTMARK_API_KEY");
+    return new Response(
+      JSON.stringify({ error: "Server configuration error" }),
       {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
+  }
 
+  try {
     const { userEmail, builderName, jobName, items } = await req.json();
     console.log("Received request:", { userEmail, builderName, jobName, items });
 
     const htmlContent = generateOrderHTML(builderName, jobName, items);
 
-    // Send email using Supabase SMTP
-    const { error } = await supabase.auth.admin.sendEmail(
-      userEmail,
-      {
-        subject: `Order Details - ${jobName}`,
-        template_name: 'order-details',
-        template_data: {
-          builderName,
-          jobName,
-          content: htmlContent,
-        }
-      }
-    );
+    // Send email using Postmark
+    const response = await fetch(POSTMARK_API_URL, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Postmark-Server-Token": POSTMARK_API_KEY
+      },
+      body: JSON.stringify({
+        From: "orders@bradley.build",
+        To: userEmail,
+        Subject: `Order Details - ${jobName}`,
+        HtmlBody: htmlContent,
+        MessageStream: "outbound"
+      })
+    });
 
-    if (error) {
-      console.error("Error sending email:", error);
-      throw error;
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("Postmark API error:", error);
+      throw new Error(error);
     }
 
-    console.log("Email sent successfully");
+    const result = await response.json();
+    console.log("Email sent successfully:", result);
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     console.error("Error in send-order-email function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 };
 
