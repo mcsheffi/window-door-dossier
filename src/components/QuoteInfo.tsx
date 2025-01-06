@@ -5,15 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface QuoteInfoProps {
   builderName: string;
   jobName: string;
+  quoteNumber?: number;
   onBuilderNameChange: (value: string) => void;
   onJobNameChange: (value: string) => void;
 }
 
-const QuoteInfo = ({ builderName, jobName, onBuilderNameChange, onJobNameChange }: QuoteInfoProps) => {
+const QuoteInfo = ({ 
+  builderName, 
+  jobName, 
+  quoteNumber,
+  onBuilderNameChange, 
+  onJobNameChange 
+}: QuoteInfoProps) => {
   return (
     <Card className="mb-6 bg-charcoal text-charcoal-foreground">
       <CardHeader>
-        <CardTitle>Quote Info</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Quote Info</CardTitle>
+          {quoteNumber && (
+            <span className="text-lg font-semibold">#{quoteNumber}</span>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

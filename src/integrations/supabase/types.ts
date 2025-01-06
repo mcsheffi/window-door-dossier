@@ -71,6 +71,7 @@ export type Database = {
           createdAt: string
           id: string
           jobName: string
+          quote_number: number | null
           updatedAt: string
           user_id: string | null
         }
@@ -79,6 +80,7 @@ export type Database = {
           createdAt?: string
           id: string
           jobName: string
+          quote_number?: number | null
           updatedAt: string
           user_id?: string | null
         }
@@ -87,6 +89,7 @@ export type Database = {
           createdAt?: string
           id?: string
           jobName?: string
+          quote_number?: number | null
           updatedAt?: string
           user_id?: string | null
         }
