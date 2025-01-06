@@ -1,23 +1,106 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { Pencil, Trash2 } from "lucide-react";
+
+interface Quote {
+  id: string;
+  quote_number: number;
+  createdAt: string;
+  items: {
+    type: string;
+  }[];
+}
 
 const Dashboard = () => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!session) {
       navigate("/login");
+      return;
     }
+    fetchQuotes();
   }, [session, navigate]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
+  const fetchQuotes = async () => {
+    try {
+      const { data: quotesData, error: quotesError } = await supabase
+        .from("Quote")
+        .select(`
+          id,
+          quote_number,
+          createdAt,
+          OrderItem (
+            type
+          )
+        `)
+        .order('createdAt', { ascending: false })
+        .limit(10);
+
+      if (quotesError) throw quotesError;
+      setQuotes(quotesData || []);
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load quotes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleDeleteQuote = async (quoteId: string) => {
+    try {
+      const { error } = await supabase
+        .from("Quote")
+        .delete()
+        .eq('id', quoteId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Quote deleted successfully",
+      });
+
+      // Refresh quotes list
+      fetchQuotes();
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete quote. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const countItemsByType = (items: { type: string }[]) => {
+    const counts = {
+      windows: 0,
+      doors: 0,
+    };
+
+    items.forEach(item => {
+      if (item.type === 'window') counts.windows++;
+      if (item.type === 'door') counts.doors++;
+    });
+
+    return counts;
+  };
+
+  if (!session) return null;
 
   return (
     <div className="min-h-screen bg-gray-900 py-8">
@@ -29,12 +112,12 @@ const Dashboard = () => {
             className="h-24 mb-6"
           />
           <div className="w-full flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-white">Recent Quotes</h1>
             <div className="space-x-4">
               <Button variant="outline" asChild>
                 <Link to="/quote">Create New Quote</Link>
               </Button>
-              <Button variant="outline" onClick={handleSignOut}>
+              <Button variant="outline" onClick={() => supabase.auth.signOut()}>
                 Sign Out
               </Button>
             </div>
@@ -42,8 +125,58 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50">
-          <h2 className="text-xl font-semibold text-white mb-4">Recent Quotes</h2>
-          <p className="text-gray-400">Quote list functionality coming soon...</p>
+          {loading ? (
+            <p className="text-white">Loading quotes...</p>
+          ) : quotes.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400 mb-4">No quotes found</p>
+              <Button asChild>
+                <Link to="/quote">Create Your First Quote</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {quotes.map((quote) => {
+                const { windows, doors } = countItemsByType(quote.items);
+                return (
+                  <div
+                    key={quote.id}
+                    className="flex items-center justify-between bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="text-white font-medium">
+                        Quote #{quote.quote_number}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        {format(new Date(quote.createdAt), 'MMM d, yyyy')}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        {windows} Windows, {doors} Doors
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/quote/${quote.id}`)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteQuote(quote.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
