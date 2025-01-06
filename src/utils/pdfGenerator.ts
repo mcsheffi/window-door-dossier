@@ -49,7 +49,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
   doc.setFontSize(12);
   doc.text(`Builder Name: ${builderName}`, margin, yPos + 5);
   doc.text(`Job Name: ${jobName}`, margin, yPos + 15);
-  doc.text(`Quote Date: ${formatDate(new Date())}`, margin, yPos + 25);
+  doc.text(`Quote#: ${formatDate(new Date())}`, margin, yPos + 25);
   yPos += 45;
 
   // Add items with numbering
