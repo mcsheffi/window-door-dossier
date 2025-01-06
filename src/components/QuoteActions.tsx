@@ -62,6 +62,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
       });
 
       onQuoteSaved(quote.quote_number);
+      return quote;
     } catch (error) {
       console.error("Error saving quote:", error);
       toast({
@@ -69,6 +70,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
         description: "Failed to save quote. Please try again.",
         variant: "destructive",
       });
+      return null;
     }
   };
 
@@ -76,8 +78,12 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     if (!validateQuoteData()) return;
 
     try {
-      // Generate and download PDF - now properly awaiting the Promise
-      const pdf = await generateOrderPDF(builderName, jobName, items);
+      // First save the quote
+      const savedQuote = await handleSaveQuote();
+      if (!savedQuote) return;
+
+      // Generate and download PDF
+      const pdf = await generateOrderPDF(builderName, jobName, items, savedQuote.quote_number);
       pdf.save(`${jobName.replace(/\s+/g, '_')}_order.pdf`);
 
       toast({

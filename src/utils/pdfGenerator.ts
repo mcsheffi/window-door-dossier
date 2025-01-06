@@ -1,10 +1,10 @@
 import jsPDF from 'jspdf';
 import { Item } from './pdf/types';
 import { getDoorHandingImage, getWindowImage } from './pdf/imageHelpers';
-import { getHandingDisplayName, capitalizeFirstLetter, formatDate } from './pdf/textFormatters';
+import { getHandingDisplayName, capitalizeFirstLetter } from './pdf/textFormatters';
 import { supabase } from '@/integrations/supabase/client';
 
-export const generateOrderPDF = async (builderName: string, jobName: string, items: Item[]) => {
+export const generateOrderPDF = async (builderName: string, jobName: string, items: Item[], quoteNumber: number) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const margin = 20;
@@ -21,12 +21,10 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     console.error('Error loading logo:', error);
   }
 
-  // Add user email and date
+  // Add user email
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Email: ${userEmail}`, pageWidth - margin - 80, yPos + 10);
-  doc.text(`Date: ${formatDate(new Date())}`, pageWidth - margin - 80, yPos + 15);
-
   yPos += 30;
 
   // Set dark background color for header
@@ -49,7 +47,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
   doc.setFontSize(12);
   doc.text(`Builder Name: ${builderName}`, margin, yPos + 5);
   doc.text(`Job Name: ${jobName}`, margin, yPos + 15);
-  doc.text(`Quote#: ${formatDate(new Date())}`, margin, yPos + 25);
+  doc.text(`Quote#: ${quoteNumber}`, margin, yPos + 25);
   yPos += 45;
 
   // Add items with numbering
@@ -60,7 +58,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
     }
 
     // Calculate text width for details
-    const maxWidth = pageWidth - (2 * margin) - 35;
+    const maxWidth = 40; // Set to 40 characters width
 
     // Add item background with rounded corners
     doc.setFillColor(245, 245, 245);
@@ -103,7 +101,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       }
 
       // Split text into lines that fit within maxWidth
-      const splitText = doc.splitTextToSize(details, maxWidth);
+      const splitText = doc.splitTextToSize(details, maxWidth * 2.5); // Multiply by 2.5 to convert characters to approximate points
       doc.text(splitText, margin + 30, yPos + 25);
 
       // Adjust yPos based on the number of lines in splitText
@@ -112,7 +110,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
       // Add notes if present
       if (item.notes) {
         const noteText = `Note: ${item.notes}`;
-        const splitNotes = doc.splitTextToSize(noteText, maxWidth);
+        const splitNotes = doc.splitTextToSize(noteText, maxWidth * 2.5);
         doc.text(splitNotes, margin, yPos + 25 + textHeight);
         yPos += (splitNotes.length * 7); // Adjust for note height
       }
@@ -125,7 +123,7 @@ export const generateOrderPDF = async (builderName: string, jobName: string, ite
         ? `${item.door.panelType} ${item.width}×${item.height}″ ${getHandingDisplayName(item.door.handing)} ${item.door.slabType} ${item.door.hardwareType}`
         : `${capitalizeFirstLetter(item.style || '')}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}×${item.height}″ ${capitalizeFirstLetter(item.color || '')} ${capitalizeFirstLetter(item.material || '')}`;
       
-      const splitText = doc.splitTextToSize(details, maxWidth);
+      const splitText = doc.splitTextToSize(details, maxWidth * 2.5);
       doc.text(splitText, margin + 30, yPos + 25);
       yPos += 70;
     }
