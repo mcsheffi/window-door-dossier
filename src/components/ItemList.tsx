@@ -81,7 +81,15 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
       );
     } else {
       return (
-        <div>Product #: {item.productNumber}</div>
+        <div className="grid grid-cols-4 gap-4">
+          <div>Width: {item.width}"</div>
+          <div>Height: {item.height}"</div>
+          <div>Handing: {item.handing}</div>
+          <div>Panel: {item.panelType}</div>
+          <div>Slab: {item.slabType}</div>
+          <div>Hardware: {item.hardwareType}</div>
+          <div>Measurement: {item.measurementGiven}</div>
+        </div>
       );
     }
   };
