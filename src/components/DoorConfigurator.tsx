@@ -19,10 +19,18 @@ export interface DoorConfig {
   hardwareType: string;
   measurementGiven: string;
   notes?: string;
+  openingPhoto?: File;
 }
 
 const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
   const [notes, setNotes] = useState<string>('');
+  const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setOpeningPhoto(e.target.files[0]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,10 +45,12 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
       hardwareType: formData.get('hardwareType') as string,
       measurementGiven: formData.get('measurementGiven') as string,
       notes: notes || undefined,
+      openingPhoto: openingPhoto || undefined,
     };
     onAddDoor(door);
     (e.target as HTMLFormElement).reset();
     setNotes('');
+    setOpeningPhoto(null);
   };
 
   return (
@@ -130,6 +140,17 @@ const DoorConfigurator = ({ onAddDoor }: DoorConfiguratorProps) => {
                 <SelectItem value="panic">Panic</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="openingPhoto" className="text-charcoal-foreground">Opening Photo:</Label>
+            <Input 
+              type="file" 
+              id="openingPhoto" 
+              accept="image/*;capture=camera"
+              onChange={handlePhotoChange}
+              className="bg-[#403E43] text-charcoal-foreground" 
+            />
           </div>
 
           <div className="space-y-2">

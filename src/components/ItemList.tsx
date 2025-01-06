@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WindowConfig } from "./WindowConfigurator";
 import { DoorConfig } from "./DoorConfigurator";
-import { Copy, Trash2, MoveUp, MoveDown } from "lucide-react";
+import WindowItem from "./items/WindowItem";
+import DoorItem from "./items/DoorItem";
+import ItemActions from "./items/ItemActions";
 
 type Item = WindowConfig | DoorConfig;
 
@@ -74,42 +75,8 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
     }
   };
 
-  const renderItemDetails = (item: Item) => {
-    if (item.type === 'window') {
-      const details = `${capitalizeFirstLetter(item.style)}${item.subOption ? ` (${item.subOption})` : ''} ${item.width}″×${item.height}″ ${item.color} ${item.material}${item.notes ? ` - Note: ${item.notes}` : ''}`;
-      
-      return (
-        <div className="flex items-start gap-4">
-          <img 
-            src={getWindowImage(item.style, item.subOption)} 
-            alt={`${item.style} window ${item.subOption ? `(${item.subOption})` : ''}`}
-            className="w-24 h-24 object-contain rounded-lg bg-white"
-          />
-          <div className="flex-1">
-            <div>{details}</div>
-          </div>
-        </div>
-      );
-    } else {
-      const details = `${capitalizeFirstLetter(item.panelType)} ${item.width}″×${item.height}″ ${item.handing} ${item.slabType} ${item.hardwareType} ${item.measurementGiven}${item.notes ? ` - Note: ${item.notes}` : ''}`;
-      
-      return (
-        <div className="flex items-start gap-4">
-          <img 
-            src={getDoorHandingImage(item.handing)} 
-            alt={`${item.handing} door`}
-            className="w-24 h-24 object-contain rounded-lg bg-white"
-          />
-          <div className="flex-1">
-            <div>{details}</div>
-          </div>
-        </div>
-      );
-    }
-  };
-
   return (
-    <Card className="bg-charcoal text-charcoal-foreground">
+    <Card className="bg-charcoal text-charcoal-foreground w-full">
       <CardHeader>
         <CardTitle>Item List</CardTitle>
       </CardHeader>
@@ -119,43 +86,19 @@ const ItemList = ({ items, onDeleteItem, onDuplicateItem, onMoveItem }: ItemList
             <div key={index} className="flex items-center gap-4 p-4 border border-charcoal-foreground/20 rounded-lg bg-charcoal/50">
               <div className="flex-1">
                 <div className="font-semibold mb-2">{capitalizeFirstLetter(item.type)}</div>
-                {renderItemDetails(item)}
+                {item.type === 'window' ? (
+                  <WindowItem item={item} getWindowImage={getWindowImage} />
+                ) : (
+                  <DoorItem item={item} getDoorHandingImage={getDoorHandingImage} />
+                )}
               </div>
-              <div className="flex flex-col gap-2 justify-center">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onMoveItem(index, index - 1)}
-                  disabled={index === 0}
-                  className="text-black hover:text-black/80"
-                >
-                  <MoveUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onMoveItem(index, index + 1)}
-                  disabled={index === items.length - 1}
-                  className="text-black hover:text-black/80"
-                >
-                  <MoveDown className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onDuplicateItem(index)}
-                  className="text-black hover:text-black/80"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => onDeleteItem(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <ItemActions
+                index={index}
+                totalItems={items.length}
+                onMoveItem={onMoveItem}
+                onDuplicateItem={onDuplicateItem}
+                onDeleteItem={onDeleteItem}
+              />
             </div>
           ))}
           {items.length === 0 && (

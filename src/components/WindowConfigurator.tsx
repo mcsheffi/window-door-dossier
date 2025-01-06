@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import WindowMeasurements from "./window/WindowMeasurements";
+import WindowStyleOptions from "./window/WindowStyleOptions";
 
 interface WindowConfiguratorProps {
   onAddWindow: (window: WindowConfig) => void;
@@ -33,6 +34,7 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [selectedMaterial, setSelectedMaterial] = useState<string>('aluminum');
   const [customColor, setCustomColor] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
+  const [measurementGiven, setMeasurementGiven] = useState<string>('dlo');
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
@@ -148,74 +150,18 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="measurementGiven" className="text-charcoal-foreground">Measurement Given:</Label>
-            <Select name="measurementGiven" defaultValue="dlo">
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select measurement type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dlo">DLO</SelectItem>
-                <SelectItem value="rough">Rough Opening</SelectItem>
-                <SelectItem value="masonry">Masonry Opening</SelectItem>
-                <SelectItem value="frame">Frame Size</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <WindowMeasurements
+            measurementGiven={measurementGiven}
+            onMeasurementChange={setMeasurementGiven}
+          />
+
+          <WindowStyleOptions
+            selectedStyle={selectedStyle}
+            showSubOption={showSubOption}
+          />
 
           <div className="space-y-2">
-            <Label htmlFor="width" className="text-charcoal-foreground">Width (in inches):</Label>
-            <Input type="number" id="width" name="width" required className="bg-[#403E43] text-charcoal-foreground" />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="height" className="text-charcoal-foreground">Height (in inches):</Label>
-            <Input type="number" id="height" name="height" required className="bg-[#403E43] text-charcoal-foreground" />
-          </div>
-
-          {showSubOption && selectedStyle === 'casement' && (
-            <div className="space-y-2">
-              <Label className="text-charcoal-foreground">Casement Option:</Label>
-              <RadioGroup defaultValue="left" name="subOption">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="left" id="left" />
-                  <Label htmlFor="left">Left Hinge</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="right" id="right" />
-                  <Label htmlFor="right">Right Hinge</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="stationary" id="stationary" />
-                  <Label htmlFor="stationary">Stationary</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          )}
-
-          {showSubOption && selectedStyle === 'horizontal-roller' && (
-            <div className="space-y-2">
-              <Label className="text-charcoal-foreground">Roller Option:</Label>
-              <RadioGroup defaultValue="left-active" name="subOption">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="left-active" id="left-active" />
-                  <Label htmlFor="left-active">Left Active</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="right-active" id="right-active" />
-                  <Label htmlFor="right-active">Right Active</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="three-panel" id="three-panel" />
-                  <Label htmlFor="three-panel">3 Panel</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="openingPhoto" className="text-charcoal-foreground">Opening Photo (if Available):</Label>
+            <Label htmlFor="openingPhoto" className="text-charcoal-foreground">Opening Photo:</Label>
             <Input 
               type="file" 
               id="openingPhoto" 
