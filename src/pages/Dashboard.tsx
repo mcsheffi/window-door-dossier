@@ -11,7 +11,7 @@ interface Quote {
   id: string;
   quote_number: number;
   createdAt: string;
-  items: {
+  OrderItem: {
     type: string;
   }[];
 }
@@ -137,7 +137,7 @@ const Dashboard = () => {
           ) : (
             <div className="space-y-4">
               {quotes.map((quote) => {
-                const { windows, doors } = countItemsByType(quote.items);
+                const { windows, doors } = countItemsByType(quote.OrderItem);
                 return (
                   <div
                     key={quote.id}
