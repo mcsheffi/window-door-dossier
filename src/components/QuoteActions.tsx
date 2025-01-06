@@ -1,0 +1,170 @@
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface QuoteActionsProps {
+  builderName: string;
+  jobName: string;
+  items: any[];
+  session: any;
+  onQuoteSaved: (quoteNumber: number) => void;
+}
+
+const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: QuoteActionsProps) => {
+  const { toast } = useToast();
+
+  const handleSaveQuote = async () => {
+    if (!session?.user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save a quote.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!builderName || !jobName) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both Builder Name and Job Name before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "Empty Quote",
+        description: "Please add at least one window or door to your quote before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: quote, error: quoteError } = await supabase
+        .from("Quote")
+        .insert([
+          {
+            builderName,
+            jobName,
+            user_id: session.user.id,
+          },
+        ])
+        .select()
+        .single();
+
+      if (quoteError) throw quoteError;
+
+      const itemsWithQuoteId = items.map((item) => ({
+        quoteId: quote.id,
+        type: 'door' in item ? 'door' : 'window',
+        width: item.width,
+        height: item.height,
+        style: 'door' in item ? item.panelType : item.style,
+        subStyle: 'door' in item ? item.handing : item.subOption,
+        material: item.material || null,
+        color: item.color || null,
+        productNumber: null,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("OrderItem")
+        .insert(itemsWithQuoteId);
+
+      if (itemsError) throw itemsError;
+
+      toast({
+        title: "Quote Saved",
+        description: `Quote #${quote.quote_number} has been saved successfully.`,
+      });
+
+      onQuoteSaved(quote.quote_number);
+    } catch (error) {
+      console.error("Error saving quote:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save quote. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!session?.user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit an order.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!builderName || !jobName) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both Builder Name and Job Name before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items.length === 0) {
+      toast({
+        title: "Empty Order",
+        description: "Please add at least one window or door to your order before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            userId: session.user.id,
+            userEmail: session.user.email,
+            builderName,
+            jobName,
+            items,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send order email");
+      }
+
+      toast({
+        title: "Order Submitted",
+        description: "Your order has been submitted and emailed to you. Please check your email and print to PDF.",
+      });
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit order. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="flex gap-4 mt-6">
+      <Button onClick={handleSaveQuote} variant="outline" className="flex-1">
+        Save Quote
+      </Button>
+      <Button onClick={handleSubmitOrder} className="flex-1">
+        Submit Order
+      </Button>
+    </div>
+  );
+};
+
+export default QuoteActions;

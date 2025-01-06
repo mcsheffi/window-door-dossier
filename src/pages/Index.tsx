@@ -1,14 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useState } from "react";
 import QuoteInfo from "@/components/QuoteInfo";
 import WindowConfigurator, { WindowConfig } from "@/components/WindowConfigurator";
 import DoorConfigurator, { DoorConfig } from "@/components/DoorConfigurator";
 import ItemList from "@/components/ItemList";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import QuoteActions from "@/components/QuoteActions";
 
 type Item = WindowConfig | DoorConfig;
 
@@ -18,7 +16,7 @@ const Index = () => {
   const [builderName, setBuilderName] = useState("");
   const [jobName, setJobName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
-  const { toast } = useToast();
+  const [quoteNumber, setQuoteNumber] = useState<number>();
 
   useEffect(() => {
     if (!session) {
@@ -74,74 +72,12 @@ const Index = () => {
     setItems(newItems);
   };
 
-  const handleSubmitOrder = async () => {
-    if (!session?.user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to submit an order.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!builderName || !jobName) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both Builder Name and Job Name before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items.length === 0) {
-      toast({
-        title: "Empty Order",
-        description: "Please add at least one window or door to your order before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-order-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            userId: session.user.id,
-            userEmail: session.user.email,
-            builderName,
-            jobName,
-            items,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to send order email");
-      }
-
-      toast({
-        title: "Order Submitted",
-        description: "Your order has been submitted and emailed to you. Please check your email and print to PDF.",
-      });
-
-      // Clear the form
-      setBuilderName("");
-      setJobName("");
-      setItems([]);
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit order. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleQuoteSaved = (newQuoteNumber: number) => {
+    setQuoteNumber(newQuoteNumber);
+    // Clear the form after successful save
+    setBuilderName("");
+    setJobName("");
+    setItems([]);
   };
 
   if (!session) {
@@ -170,6 +106,7 @@ const Index = () => {
             <QuoteInfo
               builderName={builderName}
               jobName={jobName}
+              quoteNumber={quoteNumber}
               onBuilderNameChange={setBuilderName}
               onJobNameChange={setJobName}
             />
@@ -193,11 +130,13 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="mt-6">
-          <Button onClick={handleSubmitOrder} className="w-full bg-primary hover:bg-primary/90">
-            Submit Order
-          </Button>
-        </div>
+        <QuoteActions
+          builderName={builderName}
+          jobName={jobName}
+          items={items}
+          session={session}
+          onQuoteSaved={handleQuoteSaved}
+        />
       </div>
     </div>
   );
