@@ -7,18 +7,25 @@ interface OllamaResponse {
   done: boolean;
 }
 
-export const generateWithOllama = async (prompt: string, model: string = 'llama2'): Promise<string> {
+export const generateWithOllama = async (prompt: string, model: string = 'llama2'): Promise<string> => {
   try {
-    const { data: { OLLAMA_API_URL }, error: secretError } = await supabase
+    // First check if user is authenticated
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      throw new Error('Authentication required');
+    }
+
+    const { data, error: secretError } = await supabase
       .functions.invoke('get-secret', {
         body: { secretName: 'OLLAMA_API_URL' }
       });
 
-    if (secretError || !OLLAMA_API_URL) {
+    if (secretError || !data?.OLLAMA_API_URL) {
       throw new Error('Failed to get Ollama API URL');
     }
 
-    const response = await fetch(`${OLLAMA_API_URL}/api/generate`, {
+    const response = await fetch(`${data.OLLAMA_API_URL}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -34,8 +41,8 @@ export const generateWithOllama = async (prompt: string, model: string = 'llama2
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json() as OllamaResponse;
-    return data.response;
+    const responseData = await response.json() as OllamaResponse;
+    return responseData.response;
   } catch (error) {
     console.error('Error generating with Ollama:', error);
     throw error;
