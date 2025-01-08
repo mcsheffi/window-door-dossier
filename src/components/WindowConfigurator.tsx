@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WindowMeasurements from "./window/WindowMeasurements";
 import WindowStyleOptions from "./window/WindowStyleOptions";
+import WindowVendorStyle from "./window/WindowVendorStyle";
+import WindowOpeningType from "./window/WindowOpeningType";
 
 interface WindowConfiguratorProps {
   onAddWindow: (window: WindowConfig) => void;
@@ -13,6 +15,8 @@ interface WindowConfiguratorProps {
 
 export interface WindowConfig {
   type: 'window';
+  vendorStyle: string;
+  openingType: string;
   color: string;
   customColor?: string;
   material: string;
@@ -23,7 +27,6 @@ export interface WindowConfig {
   measurementGiven: string;
   openingPhoto?: File;
   notes?: string;
-  // New door specific options
   numberOfPanels?: string;
   stackType?: string;
   pocketType?: string;
@@ -40,6 +43,8 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [customColor, setCustomColor] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [measurementGiven, setMeasurementGiven] = useState<string>('dlo');
+  const [selectedVendor, setSelectedVendor] = useState<string>('cws');
+  const [selectedOpening, setSelectedOpening] = useState<string>('masonry');
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
@@ -59,6 +64,8 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
     
     const window: WindowConfig = {
       type: 'window',
+      vendorStyle: selectedVendor,
+      openingType: selectedOpening,
       color: selectedColor === 'custom' ? customColor : selectedColor,
       material: selectedMaterial,
       width: formData.get('width') as string,
@@ -88,6 +95,16 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <WindowVendorStyle
+            selectedVendor={selectedVendor}
+            onVendorChange={setSelectedVendor}
+          />
+
+          <WindowOpeningType
+            selectedOpening={selectedOpening}
+            onOpeningChange={setSelectedOpening}
+          />
+
           <div className="space-y-2">
             <Label htmlFor="color" className="text-charcoal-foreground">Window Color:</Label>
             <Select 
