@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 type Item = WindowConfig | DoorConfig;
 
@@ -63,6 +64,39 @@ const QuoteContainer = ({
     fetchSavedQuotes();
   }, []);
 
+  useEffect(() => {
+    const createInitialQuote = async () => {
+      if (builderName && jobName && !quoteId && session?.user) {
+        const newQuoteId = uuidv4();
+        const { data: quote, error } = await supabase
+          .from('Quote')
+          .insert({
+            id: newQuoteId,
+            builderName,
+            jobName,
+            user_id: session.user.id,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Failed to create initial quote",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (quote) {
+          onQuoteSaved(quote.quote_number, quote.id);
+        }
+      }
+    };
+
+    createInitialQuote();
+  }, [builderName, jobName, quoteId, session?.user, onQuoteSaved, toast]);
+
   const fetchSavedQuotes = async () => {
     const { data: quotes, error } = await supabase
       .from('Quote')
@@ -91,7 +125,6 @@ const QuoteContainer = ({
       return;
     }
 
-    // First, get the quote details
     const { data: quote, error: quoteError } = await supabase
       .from('Quote')
       .select('*')
@@ -107,12 +140,10 @@ const QuoteContainer = ({
       return;
     }
 
-    // Update quote details
     onBuilderNameChange(quote.builderName);
     onJobNameChange(quote.jobName);
     onQuoteSaved(quote.quote_number, quote.id);
 
-    // Get quote items
     const { data: items, error } = await supabase
       .from('OrderItem')
       .select('*')
@@ -127,8 +158,8 @@ const QuoteContainer = ({
       return;
     }
 
-    // Clear existing items by calling onDeleteItem for each item
-    while (items.length > 0) {
+    // Clear existing items
+    while (items && items.length > 0) {
       onDeleteItem(0);
     }
 
