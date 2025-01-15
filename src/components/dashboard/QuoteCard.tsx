@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { Trash2, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -27,36 +27,43 @@ const QuoteCard = ({ quote, onEdit, onDelete }: QuoteCardProps) => {
   };
 
   return (
-    <div 
-      onClick={handleEdit}
-      className="flex items-center justify-between bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors cursor-pointer"
-    >
-      <div className="flex-1">
-        <div className="flex items-baseline gap-2 mb-1">
-          <p className="text-white font-medium">
-            {quote.builderName}
+    <div className="bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1">
+          <div className="flex items-baseline gap-2 mb-1">
+            <p className="text-white font-medium">
+              {quote.builderName}
+            </p>
+            <span className="text-gray-400">-</span>
+            <p className="text-white">
+              {quote.jobName}
+            </p>
+          </div>
+          <p className="text-gray-400 text-sm">
+            Quote #{quote.quote_number} - {format(new Date(quote.createdAt), 'MMM d, yyyy')}
           </p>
-          <span className="text-gray-400">-</span>
-          <p className="text-white">
-            {quote.jobName}
+          <p className="text-gray-400 text-sm">
+            {windows} Windows, {doors} Doors
           </p>
         </div>
-        <p className="text-gray-400 text-sm">
-          Quote #{quote.quote_number} - {format(new Date(quote.createdAt), 'MMM d, yyyy')}
-        </p>
-        <p className="text-gray-400 text-sm">
-          {windows} Windows, {doors} Doors
-        </p>
-      </div>
-      <div onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => onDelete(quote.id)}
-        >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleEdit}
+          >
+            <FileEdit className="h-4 w-4" />
+            <span>Load Quote</span>
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => onDelete(quote.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Delete</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
