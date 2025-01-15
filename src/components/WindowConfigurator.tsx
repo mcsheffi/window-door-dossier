@@ -180,99 +180,101 @@ const WindowConfigurator = ({ onAddWindow, builderName, jobName }: WindowConfigu
   };
 
   return (
-    <Card className="mb-6 bg-charcoal text-charcoal-foreground">
-      <CardHeader>
-        <CardTitle>Window Configurator</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4 mb-4">
-          <div className="space-y-2">
-            <Label htmlFor="savedQuote">Load Saved Quote:</Label>
-            <Select value={selectedQuote} onValueChange={setSelectedQuote}>
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select a saved quote" />
-              </SelectTrigger>
-              <SelectContent>
-                {savedQuotes.map((quote) => (
-                  <SelectItem key={quote.id} value={quote.id}>
-                    {quote.builderName} - {quote.jobName} (#{quote.quote_number})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button 
-            onClick={handleLoadQuote}
-            variant="outline"
-            className="w-full"
-          >
-            Load Selected Quote
-          </Button>
+    <>
+      <div className="space-y-4 mb-8">
+        <div className="space-y-2">
+          <Label htmlFor="savedQuote">Load Saved Quote:</Label>
+          <Select value={selectedQuote} onValueChange={setSelectedQuote}>
+            <SelectTrigger className="bg-[#403E43]">
+              <SelectValue placeholder="Select a saved quote" />
+            </SelectTrigger>
+            <SelectContent>
+              {savedQuotes.map((quote) => (
+                <SelectItem key={quote.id} value={quote.id}>
+                  {quote.builderName} - {quote.jobName} (#{quote.quote_number})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        <Button 
+          onClick={handleLoadQuote}
+          variant="outline"
+          className="w-full"
+        >
+          Load Selected Quote
+        </Button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <WindowVendorStyle
-            selectedVendor={selectedVendor}
-            onVendorChange={setSelectedVendor}
-          />
+      <Card className="mb-6 bg-charcoal text-charcoal-foreground">
+        <CardHeader>
+          <CardTitle>Window Configurator</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <WindowVendorStyle
+              selectedVendor={selectedVendor}
+              onVendorChange={setSelectedVendor}
+            />
 
-          <WindowOpeningType
-            selectedOpening={selectedOpening}
-            onOpeningChange={setSelectedOpening}
-          />
+            <WindowOpeningType
+              selectedOpening={selectedOpening}
+              onOpeningChange={setSelectedOpening}
+            />
 
-          <WindowColorSelector
-            selectedColor={selectedColor}
-            onColorChange={setSelectedColor}
-            customColor={customColor}
-            onCustomColorChange={setCustomColor}
-          />
+            <WindowColorSelector
+              selectedColor={selectedColor}
+              onColorChange={setSelectedColor}
+              customColor={customColor}
+              onCustomColorChange={setCustomColor}
+            />
 
-          <WindowMaterialSelector
-            selectedMaterial={selectedMaterial}
-            onMaterialChange={setSelectedMaterial}
-          />
+            <WindowMaterialSelector
+              selectedMaterial={selectedMaterial}
+              onMaterialChange={setSelectedMaterial}
+            />
 
-          <div className="space-y-2">
-            <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
-            <Select name="style" value={selectedStyle} onValueChange={handleStyleChange}>
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single-hung">Single-Hung</SelectItem>
-                <SelectItem value="awning">Awning</SelectItem>
-                <SelectItem value="casement">Casement</SelectItem>
-                <SelectItem value="double-hung">Double-Hung</SelectItem>
-                <SelectItem value="fixed">Fixed Window</SelectItem>
-                <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
-                <SelectItem value="sliding-glass-door">Sliding Glass Door</SelectItem>
-                <SelectItem value="swing-door">Swing Door</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
+              <Select name="style" value={selectedStyle} onValueChange={handleStyleChange}>
+                <SelectTrigger className="bg-[#403E43]">
+                  <SelectValue placeholder="Select style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single-hung">Single-Hung</SelectItem>
+                  <SelectItem value="awning">Awning</SelectItem>
+                  <SelectItem value="casement">Casement</SelectItem>
+                  <SelectItem value="double-hung">Double-Hung</SelectItem>
+                  <SelectItem value="fixed">Fixed Window</SelectItem>
+                  <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
+                  <SelectItem value="sliding-glass-door">Sliding Glass Door</SelectItem>
+                  <SelectItem value="swing-door">Swing Door</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <WindowMeasurements
-            measurementGiven={measurementGiven}
-            onMeasurementChange={setMeasurementGiven}
-          />
+            <WindowMeasurements
+              measurementGiven={measurementGiven}
+              onMeasurementChange={setMeasurementGiven}
+            />
 
-          <WindowStyleOptions
-            selectedStyle={selectedStyle}
-            showSubOption={showSubOption}
-            showDoorOptions={showDoorOptions}
-          />
+            <WindowStyleOptions
+              selectedStyle={selectedStyle}
+              showSubOption={showSubOption}
+              showDoorOptions={showDoorOptions}
+            />
 
-          <WindowPhotoAndNotes
-            notes={notes}
-            onNotesChange={setNotes}
-            onPhotoChange={handlePhotoChange}
-          />
+            <WindowPhotoAndNotes
+              notes={notes}
+              onNotesChange={setNotes}
+              onPhotoChange={handlePhotoChange}
+            />
 
-          <Button type="submit" className="w-full">Add Window to List</Button>
-        </form>
-      </CardContent>
-    </Card>
+            <Button type="submit" className="w-full">Add Window to List</Button>
+          </form>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 
