@@ -14,8 +14,8 @@ const PageHeader = ({ isEditing, onSignOut }: PageHeaderProps) => {
         alt="Bradley Building Products Logo"
         className="h-24 mb-6"
       />
-      <div className="w-full flex justify-between items-center">
-        <h1 className="text-3xl font-bold">
+      <div className="w-full flex flex-col items-center space-y-4">
+        <h1 className="text-3xl font-bold text-white">
           {isEditing ? "Edit Quote" : "Window & Door Configurator"}
         </h1>
         <div className="flex items-center space-x-4">
