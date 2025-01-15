@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { saveQuote } from "@/services/quoteService";
 import { generateOrderPDF } from "@/utils/pdfGenerator";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuoteActionsProps {
   builderName: string;
@@ -9,9 +10,17 @@ interface QuoteActionsProps {
   items: any[];
   session: any;
   onQuoteSaved: (quoteNumber: number) => void;
+  quoteId?: string;
 }
 
-const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: QuoteActionsProps) => {
+const QuoteActions = ({ 
+  builderName, 
+  jobName, 
+  items, 
+  session, 
+  onQuoteSaved,
+  quoteId 
+}: QuoteActionsProps) => {
   const { toast } = useToast();
 
   const validateQuoteData = () => {
@@ -49,16 +58,62 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     if (!validateQuoteData()) return;
 
     try {
-      const quote = await saveQuote({
-        builderName,
-        jobName,
-        items,
-        userId: session.user.id,
-      });
+      let quote;
+      
+      if (quoteId) {
+        // Update existing quote
+        const { data: updatedQuote, error: updateError } = await supabase
+          .from("Quote")
+          .update({
+            builderName,
+            jobName,
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', quoteId)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+
+        // Delete existing items
+        const { error: deleteError } = await supabase
+          .from("OrderItem")
+          .delete()
+          .eq('quoteId', quoteId);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new items
+        const { error: itemsError } = await supabase
+          .from("OrderItem")
+          .insert(items.map(item => ({
+            quoteId,
+            type: item.type,
+            width: parseFloat(item.width),
+            height: parseFloat(item.height),
+            style: item.style,
+            subStyle: item.subStyle,
+            material: item.material,
+            color: item.color,
+            customColor: item.customColor,
+            updatedAt: new Date().toISOString(),
+          })));
+
+        if (itemsError) throw itemsError;
+        quote = updatedQuote;
+      } else {
+        // Create new quote
+        quote = await saveQuote({
+          builderName,
+          jobName,
+          items,
+          userId: session.user.id,
+        });
+      }
 
       toast({
-        title: "Quote Saved",
-        description: `Quote #${quote.quote_number} has been saved successfully.`,
+        title: quoteId ? "Quote Updated" : "Quote Saved",
+        description: `Quote #${quote.quote_number} has been ${quoteId ? 'updated' : 'saved'} successfully.`,
       });
 
       onQuoteSaved(quote.quote_number);
@@ -67,7 +122,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
       console.error("Error saving quote:", error);
       toast({
         title: "Error",
-        description: "Failed to save quote. Please try again.",
+        description: `Failed to ${quoteId ? 'update' : 'save'} quote. Please try again.`,
         variant: "destructive",
       });
       return null;
@@ -78,7 +133,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
     if (!validateQuoteData()) return;
 
     try {
-      // First save the quote
+      // First save/update the quote
       const savedQuote = await handleSaveQuote();
       if (!savedQuote) return;
 
@@ -103,7 +158,7 @@ const QuoteActions = ({ builderName, jobName, items, session, onQuoteSaved }: Qu
   return (
     <div className="flex gap-4 mt-6">
       <Button onClick={handleSaveQuote} variant="outline" className="flex-1">
-        Save Quote
+        {quoteId ? 'Update Quote' : 'Save Quote'}
       </Button>
       <Button onClick={handleSubmitOrder} className="flex-1">
         Submit Order

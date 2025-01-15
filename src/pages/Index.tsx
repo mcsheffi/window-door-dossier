@@ -68,19 +68,32 @@ const Index = () => {
         if (itemsError) throw itemsError;
 
         // Transform order items to match the Item type
-        const transformedItems = orderItems.map((item): Item => ({
-          type: item.type as "window" | "door",
-          vendorStyle: item.style || "",
-          openingType: item.subStyle || "",
-          color: item.color || "",
-          customColor: item.customColor,
-          material: item.material || "",
-          width: item.width?.toString() || "",
-          height: item.height?.toString() || "",
-          style: item.style || "",
-          subOption: item.subStyle || "",
-          measurementGiven: "dlo", // Default value as it's not stored
-        }));
+        const transformedItems = orderItems.map((item): Item => {
+          const baseItem = {
+            color: item.color || "",
+            customColor: item.customColor,
+            material: item.material || "",
+            width: item.width?.toString() || "",
+            height: item.height?.toString() || "",
+            measurementGiven: "dlo", // Default value
+          };
+
+          if (item.type === "window") {
+            return {
+              ...baseItem,
+              type: "window",
+              style: item.style || "",
+              subOption: item.subStyle || "",
+            } as WindowConfig;
+          } else {
+            return {
+              ...baseItem,
+              type: "door",
+              panelType: item.style || "",
+              handing: item.subStyle || "",
+            } as DoorConfig;
+          }
+        });
 
         setItems(transformedItems);
       } catch (error) {
