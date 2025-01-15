@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface PageHeaderProps {
   isEditing: boolean;
@@ -12,13 +13,14 @@ const PageHeader = ({ isEditing, onSignOut }: PageHeaderProps) => {
       <img
         src="/lovable-uploads/ebeb244c-2956-4120-8334-dc0a4488607b.png"
         alt="Bradley Building Products Logo"
-        className="h-24 mb-6"
+        className="h-24 mb-6 dark:invert"
       />
       <div className="w-full flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">
+        <h1 className="text-3xl font-bold">
           {isEditing ? "Edit Quote" : "Window & Door Configurator"}
         </h1>
-        <div className="space-x-4">
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <Button variant="outline" asChild>
             <Link to="/">Dashboard</Link>
           </Button>

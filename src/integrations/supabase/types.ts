@@ -122,6 +122,44 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id: string
+          quote_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_type: string
+          id?: string
+          quote_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          quote_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_attachments_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "Quote"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           approved: boolean | null
