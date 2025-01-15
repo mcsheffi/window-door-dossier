@@ -23,11 +23,14 @@ const QuoteCard = ({ quote, onEdit, onDelete }: QuoteCardProps) => {
   const { windows, doors } = countItemsByType(quote.OrderItem);
 
   const handleEdit = () => {
-    navigate(`/${quote.id}`);
+    navigate(`/quote/${quote.id}`);
   };
 
   return (
-    <div className="flex items-center justify-between bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors">
+    <div 
+      onClick={handleEdit}
+      className="flex items-center justify-between bg-gray-700/30 p-4 rounded-lg hover:bg-gray-700/40 transition-colors cursor-pointer"
+    >
       <div className="flex-1">
         <div className="flex items-baseline gap-2 mb-1">
           <p className="text-white font-medium">
@@ -45,7 +48,7 @@ const QuoteCard = ({ quote, onEdit, onDelete }: QuoteCardProps) => {
           {windows} Windows, {doors} Doors
         </p>
       </div>
-      <div>
+      <div onClick={(e) => e.stopPropagation()}>
         <Button
           variant="destructive"
           size="sm"
