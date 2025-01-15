@@ -14,7 +14,7 @@ const DashboardHeader = () => {
         <h1 className="text-3xl font-bold text-white">Recent Quotes</h1>
         <div className="space-x-4">
           <Button variant="outline" asChild>
-            <Link to="/quote">Create New Quote</Link>
+            <Link to="/quote">Create/Load Quote</Link>
           </Button>
           <Button variant="outline" onClick={() => supabase.auth.signOut()}>
             Sign Out
