@@ -69,28 +69,31 @@ const Index = () => {
 
         // Transform order items to match the Item type
         const transformedItems = orderItems.map((item): Item => {
-          const baseItem = {
-            color: item.color || "",
-            customColor: item.customColor,
-            material: item.material || "",
-            width: item.width?.toString() || "",
-            height: item.height?.toString() || "",
-            measurementGiven: "dlo", // Default value
-          };
-
           if (item.type === "window") {
             return {
-              ...baseItem,
               type: "window",
               style: item.style || "",
               subOption: item.subStyle || "",
+              color: item.color || "",
+              customColor: item.customColor || "",
+              material: item.material || "",
+              width: item.width?.toString() || "",
+              height: item.height?.toString() || "",
+              measurementGiven: "dlo",
             } as WindowConfig;
           } else {
             return {
-              ...baseItem,
               type: "door",
               panelType: item.style || "",
               handing: item.subStyle || "",
+              color: item.color || "",
+              customColor: item.customColor || "",
+              material: item.material || "",
+              width: item.width?.toString() || "",
+              height: item.height?.toString() || "",
+              measurementGiven: "dlo",
+              slabType: "solid_core", // Default value
+              hardwareType: "standard", // Default value
             } as DoorConfig;
           }
         });

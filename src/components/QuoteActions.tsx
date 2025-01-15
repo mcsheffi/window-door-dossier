@@ -3,6 +3,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { saveQuote } from "@/services/quoteService";
 import { generateOrderPDF } from "@/utils/pdfGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
 
 interface QuoteActionsProps {
   builderName: string;
@@ -83,16 +84,17 @@ const QuoteActions = ({
 
         if (deleteError) throw deleteError;
 
-        // Insert new items
+        // Insert new items with generated IDs
         const { error: itemsError } = await supabase
           .from("OrderItem")
           .insert(items.map(item => ({
+            id: uuidv4(),
             quoteId,
             type: item.type,
             width: parseFloat(item.width),
             height: parseFloat(item.height),
-            style: item.style,
-            subStyle: item.subStyle,
+            style: item.style || item.panelType,
+            subStyle: item.subStyle || item.handing,
             material: item.material,
             color: item.color,
             customColor: item.customColor,
