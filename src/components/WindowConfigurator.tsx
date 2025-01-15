@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import WindowMeasurements from "./window/WindowMeasurements";
 import WindowStyleOptions from "./window/WindowStyleOptions";
 import WindowVendorStyle from "./window/WindowVendorStyle";
 import WindowOpeningType from "./window/WindowOpeningType";
+import WindowColorSelector from "./window/WindowColorSelector";
+import WindowMaterialSelector from "./window/WindowMaterialSelector";
+import WindowPhotoAndNotes from "./window/WindowPhotoAndNotes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface WindowConfiguratorProps {
   onAddWindow: (window: WindowConfig) => void;
@@ -33,7 +35,6 @@ export interface WindowConfig {
 }
 
 const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
-  const [showCustomColor, setShowCustomColor] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>('single-hung');
   const [showSubOption, setShowSubOption] = useState(false);
   const [showDoorOptions, setShowDoorOptions] = useState(false);
@@ -105,60 +106,17 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
             onOpeningChange={setSelectedOpening}
           />
 
-          <div className="space-y-2">
-            <Label htmlFor="color" className="text-charcoal-foreground">Window Color:</Label>
-            <Select 
-              name="color" 
-              value={selectedColor}
-              onValueChange={(value) => {
-                setSelectedColor(value);
-                setShowCustomColor(value === 'custom');
-              }}
-            >
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select color" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bronze">Bronze</SelectItem>
-                <SelectItem value="black">Black</SelectItem>
-                <SelectItem value="white">White</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <WindowColorSelector
+            selectedColor={selectedColor}
+            onColorChange={setSelectedColor}
+            customColor={customColor}
+            onCustomColorChange={setCustomColor}
+          />
 
-          {showCustomColor && (
-            <div className="space-y-2">
-              <Label htmlFor="customColor">Custom Color:</Label>
-              <Input 
-                type="text" 
-                id="customColor" 
-                value={customColor}
-                onChange={(e) => setCustomColor(e.target.value)}
-                required 
-                placeholder="Enter custom color" 
-                className="bg-[#403E43] text-charcoal-foreground" 
-              />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="material" className="text-charcoal-foreground">Material:</Label>
-            <Select 
-              name="material" 
-              value={selectedMaterial}
-              onValueChange={setSelectedMaterial}
-            >
-              <SelectTrigger className="bg-[#403E43]">
-                <SelectValue placeholder="Select material" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="aluminum">Aluminum</SelectItem>
-                <SelectItem value="vinyl">Vinyl</SelectItem>
-                <SelectItem value="wood">Wood</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <WindowMaterialSelector
+            selectedMaterial={selectedMaterial}
+            onMaterialChange={setSelectedMaterial}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
@@ -190,28 +148,11 @@ const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
             showDoorOptions={showDoorOptions}
           />
 
-          <div className="space-y-2">
-            <Label htmlFor="openingPhoto" className="text-charcoal-foreground">Opening Photo:</Label>
-            <Input 
-              type="file" 
-              id="openingPhoto" 
-              accept="image/*;capture=camera"
-              onChange={handlePhotoChange}
-              className="bg-[#403E43] text-charcoal-foreground"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="text-charcoal-foreground">Notes:</Label>
-            <Input 
-              type="text" 
-              id="notes" 
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any additional notes here" 
-              className="bg-[#403E43] text-charcoal-foreground" 
-            />
-          </div>
+          <WindowPhotoAndNotes
+            notes={notes}
+            onNotesChange={setNotes}
+            onPhotoChange={handlePhotoChange}
+          />
 
           <Button type="submit" className="w-full">Add Window to List</Button>
         </form>
