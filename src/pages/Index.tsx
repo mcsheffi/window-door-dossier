@@ -63,31 +63,38 @@ const Index = () => {
         if (itemsError) throw itemsError;
 
         const transformedItems = orderItems.map((item): Item => {
+          const baseConfig = {
+            width: item.width?.toString() || "",
+            height: item.height?.toString() || "",
+            color: item.color || "",
+            customColor: item.customColor || "",
+            material: item.material || "",
+            notes: item.notes || undefined,
+            openingPhoto: undefined,
+          };
+
           if (item.type === "window") {
             return {
+              ...baseConfig,
               type: "window",
               style: item.style || "",
-              subOption: item.subStyle || "",
-              color: item.color || "",
-              customColor: item.customColor || "",
-              material: item.material || "",
-              width: item.width?.toString() || "",
-              height: item.height?.toString() || "",
-              measurementGiven: "dlo",
+              subOption: item.subStyle || undefined,
+              vendorStyle: item.vendorStyle || "cws",
+              openingType: item.openingType || "masonry",
+              measurementGiven: item.measurementGiven || "dlo",
+              numberOfPanels: item.numberOfPanels?.toString(),
+              stackType: item.stackType,
+              pocketType: item.pocketType,
             } as WindowConfig;
           } else {
             return {
+              ...baseConfig,
               type: "door",
-              panelType: item.style || "",
-              handing: item.subStyle || "",
-              color: item.color || "",
-              customColor: item.customColor || "",
-              material: item.material || "",
-              width: item.width?.toString() || "",
-              height: item.height?.toString() || "",
-              measurementGiven: "dlo",
-              slabType: "solid_core",
-              hardwareType: "standard",
+              panelType: item.style || "single",
+              handing: item.subStyle || "lh-in",
+              slabType: item.slabType || "flush",
+              hardwareType: item.hardwareType || "standard",
+              measurementGiven: item.measurementGiven || "dlo",
             } as DoorConfig;
           }
         });
