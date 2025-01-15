@@ -91,28 +91,6 @@ const QuoteContainer = ({
       return;
     }
 
-    // First, get the quote details
-    const { data: quote, error: quoteError } = await supabase
-      .from('Quote')
-      .select('*')
-      .eq('id', selectedQuote)
-      .single();
-
-    if (quoteError) {
-      toast({
-        title: "Error",
-        description: "Failed to load quote details",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Update quote info
-    onBuilderNameChange(quote.builderName);
-    onJobNameChange(quote.jobName);
-    onQuoteSaved(quote.quote_number, quote.id);
-
-    // Get quote items
     const { data: items, error } = await supabase
       .from('OrderItem')
       .select('*')
@@ -127,12 +105,6 @@ const QuoteContainer = ({
       return;
     }
 
-    // Clear existing items by calling onDeleteItem for each item
-    while (items.length > 0) {
-      onDeleteItem(0);
-    }
-
-    // Add new items
     if (items && items.length > 0) {
       items.forEach(item => {
         if (item.type === 'window') {
@@ -175,7 +147,7 @@ const QuoteContainer = ({
 
       toast({
         title: "Success",
-        description: "Quote loaded successfully",
+        description: "Quote items loaded successfully",
       });
     }
   };
