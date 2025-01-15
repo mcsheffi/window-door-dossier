@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DoorConfiguratorProps {
@@ -31,90 +30,11 @@ export interface DoorConfig {
   material?: string;
 }
 
-interface SavedQuote {
-  id: string;
-  builderName: string;
-  jobName: string;
-  quote_number: number;
-}
-
 const DoorConfigurator = ({ onAddDoor, builderName, jobName }: DoorConfiguratorProps) => {
   const [notes, setNotes] = useState<string>('');
   const [openingPhoto, setOpeningPhoto] = useState<File | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
-  const [selectedQuote, setSelectedQuote] = useState<string>('');
   const { toast } = useToast();
-
-  useEffect(() => {
-    fetchSavedQuotes();
-  }, []);
-
-  const fetchSavedQuotes = async () => {
-    const { data: quotes, error } = await supabase
-      .from('Quote')
-      .select('id, builderName, jobName, quote_number')
-      .order('createdAt', { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch saved quotes",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSavedQuotes(quotes || []);
-  };
-
-  const handleLoadQuote = async () => {
-    if (!selectedQuote) {
-      toast({
-        title: "Error",
-        description: "Please select a quote to load",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { data: items, error } = await supabase
-      .from('OrderItem')
-      .select('*')
-      .eq('quoteId', selectedQuote)
-      .eq('type', 'door');
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load quote items",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items && items.length > 0) {
-      items.forEach(item => {
-        const doorConfig: DoorConfig = {
-          type: 'door',
-          width: item.width?.toString() || '',
-          height: item.height?.toString() || '',
-          handing: item.subStyle || 'lh-in',
-          panelType: item.style || 'single',
-          slabType: item.slab_type || 'flush',
-          hardwareType: item.hardware_type || 'standard',
-          measurementGiven: item.measurement_given || 'dlo',
-          notes: item.notes,
-        };
-        onAddDoor(doorConfig);
-      });
-
-      toast({
-        title: "Success",
-        description: "Quote items loaded successfully",
-      });
-    }
-  };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -161,31 +81,6 @@ const DoorConfigurator = ({ onAddDoor, builderName, jobName }: DoorConfiguratorP
         </CardHeader>
         <CollapsibleContent>
           <CardContent>
-            <div className="space-y-4 mb-4">
-              <div className="space-y-2">
-                <Label htmlFor="savedQuote">Load Saved Quote:</Label>
-                <Select value={selectedQuote} onValueChange={setSelectedQuote}>
-                  <SelectTrigger className="bg-[#403E43]">
-                    <SelectValue placeholder="Select a saved quote" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {savedQuotes.map((quote) => (
-                      <SelectItem key={quote.id} value={quote.id}>
-                        {quote.builderName} - {quote.jobName} (#{quote.quote_number})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button 
-                onClick={handleLoadQuote}
-                variant="outline"
-                className="w-full"
-              >
-                Load Selected Quote
-              </Button>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="panelType" className="text-charcoal-foreground">Panel Type:</Label>
