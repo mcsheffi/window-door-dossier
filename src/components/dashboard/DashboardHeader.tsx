@@ -1,10 +1,19 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "next-themes";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
 
 const DashboardHeader = () => {
   const { theme } = useTheme();
+  const supabase = useSupabaseClient();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="flex flex-col items-center mb-8">
@@ -17,12 +26,13 @@ const DashboardHeader = () => {
         className="h-24 mb-6"
       />
       <div className="w-full flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Recent Quotes</h1>
-        <div className="space-x-4">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <Button variant="outline" asChild>
-            <Link to="/quote">Create/Load Quote</Link>
+            <Link to="/quote">New Quote</Link>
           </Button>
-          <Button variant="outline" onClick={() => supabase.auth.signOut()}>
+          <Button variant="outline" onClick={handleSignOut}>
             Sign Out
           </Button>
         </div>
