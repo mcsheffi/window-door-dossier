@@ -26,6 +26,9 @@ export interface DoorConfig {
   measurementGiven: string;
   notes?: string;
   openingPhoto?: File;
+  color?: string;
+  customColor?: string;
+  material?: string;
 }
 
 interface SavedQuote {
