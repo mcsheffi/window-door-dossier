@@ -14,45 +14,72 @@ export type Database = {
           color: string | null
           createdAt: string
           customColor: string | null
+          hardware_type: string | null
           height: number | null
           id: string
           material: string | null
+          measurement_given: string | null
+          notes: string | null
+          number_of_panels: string | null
+          opening_type: string | null
+          pocket_type: string | null
           productNumber: string | null
           quoteId: string
+          slab_type: string | null
+          stack_type: string | null
           style: string | null
           subStyle: string | null
           type: string
           updatedAt: string
+          vendor_style: string | null
           width: number | null
         }
         Insert: {
           color?: string | null
           createdAt?: string
           customColor?: string | null
+          hardware_type?: string | null
           height?: number | null
           id: string
           material?: string | null
+          measurement_given?: string | null
+          notes?: string | null
+          number_of_panels?: string | null
+          opening_type?: string | null
+          pocket_type?: string | null
           productNumber?: string | null
           quoteId: string
+          slab_type?: string | null
+          stack_type?: string | null
           style?: string | null
           subStyle?: string | null
           type: string
           updatedAt: string
+          vendor_style?: string | null
           width?: number | null
         }
         Update: {
           color?: string | null
           createdAt?: string
           customColor?: string | null
+          hardware_type?: string | null
           height?: number | null
           id?: string
           material?: string | null
+          measurement_given?: string | null
+          notes?: string | null
+          number_of_panels?: string | null
+          opening_type?: string | null
+          pocket_type?: string | null
           productNumber?: string | null
           quoteId?: string
+          slab_type?: string | null
+          stack_type?: string | null
           style?: string | null
           subStyle?: string | null
           type?: string
           updatedAt?: string
+          vendor_style?: string | null
           width?: number | null
         }
         Relationships: [

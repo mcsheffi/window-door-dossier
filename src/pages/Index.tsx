@@ -79,12 +79,12 @@ const Index = () => {
               type: "window",
               style: item.style || "",
               subOption: item.subStyle || undefined,
-              vendorStyle: item.vendorStyle || "cws",
-              openingType: item.openingType || "masonry",
-              measurementGiven: item.measurementGiven || "dlo",
-              numberOfPanels: item.numberOfPanels?.toString(),
-              stackType: item.stackType,
-              pocketType: item.pocketType,
+              vendorStyle: item.vendor_style || "cws",
+              openingType: item.opening_type || "masonry",
+              measurementGiven: item.measurement_given || "dlo",
+              numberOfPanels: item.number_of_panels?.toString(),
+              stackType: item.stack_type,
+              pocketType: item.pocket_type,
             } as WindowConfig;
           } else {
             return {
@@ -92,9 +92,9 @@ const Index = () => {
               type: "door",
               panelType: item.style || "single",
               handing: item.subStyle || "lh-in",
-              slabType: item.slabType || "flush",
-              hardwareType: item.hardwareType || "standard",
-              measurementGiven: item.measurementGiven || "dlo",
+              slabType: item.slab_type || "flush",
+              hardwareType: item.hardware_type || "standard",
+              measurementGiven: item.measurement_given || "dlo",
             } as DoorConfig;
           }
         });
