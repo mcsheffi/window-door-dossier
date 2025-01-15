@@ -156,9 +156,9 @@ const QuoteContainer = ({
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
         <div className="space-y-4 mb-8">
           <div className="space-y-2">
-            <Label htmlFor="savedQuote">Load Saved Quote:</Label>
+            <Label htmlFor="savedQuote" className="text-white">Load Saved Quote:</Label>
             <Select value={selectedQuote} onValueChange={setSelectedQuote}>
-              <SelectTrigger className="bg-[#403E43]">
+              <SelectTrigger className="bg-[#403E43] text-white">
                 <SelectValue placeholder="Select a saved quote" />
               </SelectTrigger>
               <SelectContent>
