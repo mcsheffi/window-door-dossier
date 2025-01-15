@@ -67,6 +67,7 @@ const QuoteContainer = ({
   useEffect(() => {
     const createInitialQuote = async () => {
       if (builderName && jobName && !quoteId && session?.user) {
+        const now = new Date().toISOString();
         const newQuoteId = uuidv4();
         const { data: quote, error } = await supabase
           .from('Quote')
@@ -75,6 +76,7 @@ const QuoteContainer = ({
             builderName,
             jobName,
             user_id: session.user.id,
+            updatedAt: now,
           })
           .select()
           .single();
@@ -176,7 +178,7 @@ const QuoteContainer = ({
             width: item.width?.toString() || '',
             height: item.height?.toString() || '',
             style: item.style || 'single-hung',
-            subOption: item.subStyle,
+            subOption: item.subStyle || undefined,
             measurementGiven: item.measurement_given || 'dlo',
             notes: item.notes,
             numberOfPanels: item.number_of_panels,
