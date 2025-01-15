@@ -34,7 +34,7 @@ interface QuoteContainerProps {
   onDeleteItem: (index: number) => void;
   onDuplicateItem: (index: number) => void;
   onMoveItem: (fromIndex: number, toIndex: number) => void;
-  onQuoteSaved: (quoteNumber: number) => void;
+  onQuoteSaved: (quoteNumber: number, quoteId: string) => void;
   session: any;
   quoteId?: string;
 }

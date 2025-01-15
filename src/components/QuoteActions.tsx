@@ -10,7 +10,7 @@ interface QuoteActionsProps {
   jobName: string;
   items: any[];
   session: any;
-  onQuoteSaved: (quoteNumber: number) => void;
+  onQuoteSaved: (quoteNumber: number, quoteId: string) => void;
   quoteId?: string;
 }
 
@@ -118,7 +118,7 @@ const QuoteActions = ({
         description: `Quote #${quote.quote_number} has been ${quoteId ? 'updated' : 'saved'} successfully.`,
       });
 
-      onQuoteSaved(quote.quote_number);
+      onQuoteSaved(quote.quote_number, quote.id);
       return quote;
     } catch (error) {
       console.error("Error saving quote:", error);

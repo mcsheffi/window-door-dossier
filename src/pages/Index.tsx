@@ -15,11 +15,12 @@ const Index = () => {
   const session = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { id: quoteId } = useParams();
+  const { id: initialQuoteId } = useParams();
   const [builderName, setBuilderName] = useState("");
   const [jobName, setJobName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [quoteNumber, setQuoteNumber] = useState<number>();
+  const [quoteId, setQuoteId] = useState<string | undefined>(initialQuoteId);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -115,6 +116,14 @@ const Index = () => {
     loadQuote();
   }, [quoteId, session, navigate, toast]);
 
+  const handleQuoteSaved = (newQuoteNumber: number, newQuoteId: string) => {
+    setQuoteNumber(newQuoteNumber);
+    setQuoteId(newQuoteId);
+    if (!quoteId) {
+      navigate(`/quote/${newQuoteId}`);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/login");
@@ -161,15 +170,6 @@ const Index = () => {
     const [removed] = newItems.splice(fromIndex, 1);
     newItems.splice(toIndex, 0, removed);
     setItems(newItems);
-  };
-
-  const handleQuoteSaved = (newQuoteNumber: number) => {
-    setQuoteNumber(newQuoteNumber);
-    if (!quoteId) {
-      setBuilderName("");
-      setJobName("");
-      setItems([]);
-    }
   };
 
   if (!session) {
