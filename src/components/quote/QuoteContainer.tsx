@@ -6,11 +6,12 @@ import WindowConfigurator from "../WindowConfigurator";
 import DoorConfigurator from "../DoorConfigurator";
 import ItemList from "../ItemList";
 import QuoteActions from "../QuoteActions";
+import QuoteDocuments from "./QuoteDocuments";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 type Item = WindowConfig | DoorConfig;
 
@@ -203,6 +204,7 @@ const QuoteContainer = ({
           onDuplicateItem={onDuplicateItem}
           onMoveItem={onMoveItem}
         />
+        {quoteId && <QuoteDocuments quoteId={quoteId} />}
       </div>
 
       <QuoteActions
