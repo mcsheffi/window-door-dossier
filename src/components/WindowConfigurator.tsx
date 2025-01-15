@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import WindowMeasurements from "./window/WindowMeasurements";
@@ -10,8 +10,6 @@ import WindowMaterialSelector from "./window/WindowMaterialSelector";
 import WindowPhotoAndNotes from "./window/WindowPhotoAndNotes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
 interface WindowConfiguratorProps {
   onAddWindow: (window: WindowConfig) => void;
@@ -38,14 +36,7 @@ export interface WindowConfig {
   pocketType?: string;
 }
 
-interface SavedQuote {
-  id: string;
-  builderName: string;
-  jobName: string;
-  quote_number: number;
-}
-
-const WindowConfigurator = ({ onAddWindow, builderName, jobName }: WindowConfiguratorProps) => {
+const WindowConfigurator = ({ onAddWindow }: WindowConfiguratorProps) => {
   const [selectedStyle, setSelectedStyle] = useState<string>('single-hung');
   const [showSubOption, setShowSubOption] = useState(false);
   const [showDoorOptions, setShowDoorOptions] = useState(false);
@@ -57,85 +48,6 @@ const WindowConfigurator = ({ onAddWindow, builderName, jobName }: WindowConfigu
   const [measurementGiven, setMeasurementGiven] = useState<string>('dlo');
   const [selectedVendor, setSelectedVendor] = useState<string>('cws');
   const [selectedOpening, setSelectedOpening] = useState<string>('masonry');
-  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
-  const [selectedQuote, setSelectedQuote] = useState<string>('');
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchSavedQuotes();
-  }, []);
-
-  const fetchSavedQuotes = async () => {
-    const { data: quotes, error } = await supabase
-      .from('Quote')
-      .select('id, builderName, jobName, quote_number')
-      .order('createdAt', { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch saved quotes",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSavedQuotes(quotes || []);
-  };
-
-  const handleLoadQuote = async () => {
-    if (!selectedQuote) {
-      toast({
-        title: "Error",
-        description: "Please select a quote to load",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const { data: items, error } = await supabase
-      .from('OrderItem')
-      .select('*')
-      .eq('quoteId', selectedQuote)
-      .eq('type', 'window');
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load quote items",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (items && items.length > 0) {
-      items.forEach(item => {
-        const windowConfig: WindowConfig = {
-          type: 'window',
-          vendorStyle: item.vendor_style || 'cws',
-          openingType: item.opening_type || 'masonry',
-          color: item.color || 'bronze',
-          customColor: item.customColor,
-          material: item.material || 'aluminum',
-          width: item.width?.toString() || '',
-          height: item.height?.toString() || '',
-          style: item.style || 'single-hung',
-          subOption: item.subStyle,
-          measurementGiven: item.measurement_given || 'dlo',
-          notes: item.notes,
-          numberOfPanels: item.number_of_panels,
-          stackType: item.stack_type,
-          pocketType: item.pocket_type,
-        };
-        onAddWindow(windowConfig);
-      });
-
-      toast({
-        title: "Success",
-        description: "Quote items loaded successfully",
-      });
-    }
-  };
 
   const handleStyleChange = (value: string) => {
     setSelectedStyle(value);
@@ -180,101 +92,74 @@ const WindowConfigurator = ({ onAddWindow, builderName, jobName }: WindowConfigu
   };
 
   return (
-    <>
-      <div className="space-y-4 mb-8">
-        <div className="space-y-2">
-          <Label htmlFor="savedQuote">Load Saved Quote:</Label>
-          <Select value={selectedQuote} onValueChange={setSelectedQuote}>
-            <SelectTrigger className="bg-[#403E43]">
-              <SelectValue placeholder="Select a saved quote" />
-            </SelectTrigger>
-            <SelectContent>
-              {savedQuotes.map((quote) => (
-                <SelectItem key={quote.id} value={quote.id}>
-                  {quote.builderName} - {quote.jobName} (#{quote.quote_number})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button 
-          onClick={handleLoadQuote}
-          variant="outline"
-          className="w-full"
-        >
-          Load Selected Quote
-        </Button>
-      </div>
+    <Card className="mb-6 bg-charcoal text-charcoal-foreground">
+      <CardHeader>
+        <CardTitle>Window Configurator</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <WindowVendorStyle
+            selectedVendor={selectedVendor}
+            onVendorChange={setSelectedVendor}
+          />
 
-      <Card className="mb-6 bg-charcoal text-charcoal-foreground">
-        <CardHeader>
-          <CardTitle>Window Configurator</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <WindowVendorStyle
-              selectedVendor={selectedVendor}
-              onVendorChange={setSelectedVendor}
-            />
+          <WindowOpeningType
+            selectedOpening={selectedOpening}
+            onOpeningChange={setSelectedOpening}
+          />
 
-            <WindowOpeningType
-              selectedOpening={selectedOpening}
-              onOpeningChange={setSelectedOpening}
-            />
+          <WindowColorSelector
+            selectedColor={selectedColor}
+            onColorChange={setSelectedColor}
+            customColor={customColor}
+            onCustomColorChange={setCustomColor}
+          />
 
-            <WindowColorSelector
-              selectedColor={selectedColor}
-              onColorChange={setSelectedColor}
-              customColor={customColor}
-              onCustomColorChange={setCustomColor}
-            />
+          <WindowMaterialSelector
+            selectedMaterial={selectedMaterial}
+            onMaterialChange={setSelectedMaterial}
+          />
 
-            <WindowMaterialSelector
-              selectedMaterial={selectedMaterial}
-              onMaterialChange={setSelectedMaterial}
-            />
+          <div className="space-y-2">
+            <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
+            <Select name="style" value={selectedStyle} onValueChange={handleStyleChange}>
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single-hung">Single-Hung</SelectItem>
+                <SelectItem value="awning">Awning</SelectItem>
+                <SelectItem value="casement">Casement</SelectItem>
+                <SelectItem value="double-hung">Double-Hung</SelectItem>
+                <SelectItem value="fixed">Fixed Window</SelectItem>
+                <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
+                <SelectItem value="sliding-glass-door">Sliding Glass Door</SelectItem>
+                <SelectItem value="swing-door">Swing Door</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="style" className="text-charcoal-foreground">Window Style:</Label>
-              <Select name="style" value={selectedStyle} onValueChange={handleStyleChange}>
-                <SelectTrigger className="bg-[#403E43]">
-                  <SelectValue placeholder="Select style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="single-hung">Single-Hung</SelectItem>
-                  <SelectItem value="awning">Awning</SelectItem>
-                  <SelectItem value="casement">Casement</SelectItem>
-                  <SelectItem value="double-hung">Double-Hung</SelectItem>
-                  <SelectItem value="fixed">Fixed Window</SelectItem>
-                  <SelectItem value="horizontal-roller">Horizontal Roller</SelectItem>
-                  <SelectItem value="sliding-glass-door">Sliding Glass Door</SelectItem>
-                  <SelectItem value="swing-door">Swing Door</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <WindowMeasurements
+            measurementGiven={measurementGiven}
+            onMeasurementChange={setMeasurementGiven}
+          />
 
-            <WindowMeasurements
-              measurementGiven={measurementGiven}
-              onMeasurementChange={setMeasurementGiven}
-            />
+          <WindowStyleOptions
+            selectedStyle={selectedStyle}
+            showSubOption={showSubOption}
+            showDoorOptions={showDoorOptions}
+          />
 
-            <WindowStyleOptions
-              selectedStyle={selectedStyle}
-              showSubOption={showSubOption}
-              showDoorOptions={showDoorOptions}
-            />
+          <WindowPhotoAndNotes
+            notes={notes}
+            onNotesChange={setNotes}
+            onPhotoChange={handlePhotoChange}
+          />
 
-            <WindowPhotoAndNotes
-              notes={notes}
-              onNotesChange={setNotes}
-              onPhotoChange={handlePhotoChange}
-            />
-
-            <Button type="submit" className="w-full">Add Window to List</Button>
-          </form>
-        </CardContent>
-      </Card>
-    </>
+          <Button type="submit" className="w-full">Add Window to List</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

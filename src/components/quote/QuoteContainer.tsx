@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { WindowConfig } from "../WindowConfigurator";
 import { DoorConfig } from "../DoorConfigurator";
 import QuoteInfo from "../QuoteInfo";
@@ -5,8 +6,20 @@ import WindowConfigurator from "../WindowConfigurator";
 import DoorConfigurator from "../DoorConfigurator";
 import ItemList from "../ItemList";
 import QuoteActions from "../QuoteActions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 type Item = WindowConfig | DoorConfig;
+
+interface SavedQuote {
+  id: string;
+  builderName: string;
+  jobName: string;
+  quote_number: number;
+}
 
 interface QuoteContainerProps {
   builderName: string;
@@ -41,9 +54,131 @@ const QuoteContainer = ({
   session,
   quoteId,
 }: QuoteContainerProps) => {
+  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([]);
+  const [selectedQuote, setSelectedQuote] = useState<string>('');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchSavedQuotes();
+  }, []);
+
+  const fetchSavedQuotes = async () => {
+    const { data: quotes, error } = await supabase
+      .from('Quote')
+      .select('id, builderName, jobName, quote_number')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch saved quotes",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavedQuotes(quotes || []);
+  };
+
+  const handleLoadQuote = async () => {
+    if (!selectedQuote) {
+      toast({
+        title: "Error",
+        description: "Please select a quote to load",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: items, error } = await supabase
+      .from('OrderItem')
+      .select('*')
+      .eq('quoteId', selectedQuote);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load quote items",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (items && items.length > 0) {
+      items.forEach(item => {
+        if (item.type === 'window') {
+          const windowConfig: WindowConfig = {
+            type: 'window',
+            vendorStyle: item.vendor_style || 'cws',
+            openingType: item.opening_type || 'masonry',
+            color: item.color || 'bronze',
+            customColor: item.customColor,
+            material: item.material || 'aluminum',
+            width: item.width?.toString() || '',
+            height: item.height?.toString() || '',
+            style: item.style || 'single-hung',
+            subOption: item.subStyle,
+            measurementGiven: item.measurement_given || 'dlo',
+            notes: item.notes,
+            numberOfPanels: item.number_of_panels,
+            stackType: item.stack_type,
+            pocketType: item.pocket_type,
+          };
+          onAddWindow(windowConfig);
+        } else if (item.type === 'door') {
+          const doorConfig: DoorConfig = {
+            type: 'door',
+            color: item.color || 'bronze',
+            customColor: item.customColor,
+            material: item.material || 'aluminum',
+            width: item.width?.toString() || '',
+            height: item.height?.toString() || '',
+            panelType: item.style || 'single',
+            handing: item.subStyle || 'lh-in',
+            slabType: item.slab_type || 'flush',
+            hardwareType: item.hardware_type || 'standard',
+            measurementGiven: item.measurement_given || 'dlo',
+            notes: item.notes,
+          };
+          onAddDoor(doorConfig);
+        }
+      });
+
+      toast({
+        title: "Success",
+        description: "Quote items loaded successfully",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+        <div className="space-y-4 mb-8">
+          <div className="space-y-2">
+            <Label htmlFor="savedQuote">Load Saved Quote:</Label>
+            <Select value={selectedQuote} onValueChange={setSelectedQuote}>
+              <SelectTrigger className="bg-[#403E43]">
+                <SelectValue placeholder="Select a saved quote" />
+              </SelectTrigger>
+              <SelectContent>
+                {savedQuotes.map((quote) => (
+                  <SelectItem key={quote.id} value={quote.id}>
+                    {quote.builderName} - {quote.jobName} (#{quote.quote_number})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button 
+            onClick={handleLoadQuote}
+            variant="outline"
+            className="w-full"
+          >
+            Load Selected Quote
+          </Button>
+        </div>
+
         <QuoteInfo
           builderName={builderName}
           jobName={jobName}
