@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Pencil, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -45,15 +45,7 @@ const QuoteCard = ({ quote, onEdit, onDelete }: QuoteCardProps) => {
           {windows} Windows, {doors} Doors
         </p>
       </div>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleEdit}
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit</span>
-        </Button>
+      <div>
         <Button
           variant="destructive"
           size="sm"
