@@ -204,8 +204,13 @@ const QuoteContainer = ({
           onDuplicateItem={onDuplicateItem}
           onMoveItem={onMoveItem}
         />
-        {quoteId && <QuoteDocuments quoteId={quoteId} />}
       </div>
+
+      {quoteId && (
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
+          <QuoteDocuments quoteId={quoteId} />
+        </div>
+      )}
 
       <QuoteActions
         builderName={builderName}
