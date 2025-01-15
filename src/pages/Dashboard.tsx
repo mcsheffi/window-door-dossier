@@ -64,6 +64,10 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditQuote = (quoteId: string) => {
+    navigate(`/quote/${quoteId}`);
+  };
+
   const handleDeleteQuote = async (quoteId: string) => {
     try {
       // First, delete all OrderItems associated with this quote
@@ -176,7 +180,7 @@ const Dashboard = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/quote/${quote.id}`)}
+                        onClick={() => handleEditQuote(quote.id)}
                       >
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit</span>
