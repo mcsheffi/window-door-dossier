@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 type Item = WindowConfig | DoorConfig;
 
@@ -79,6 +80,49 @@ const QuoteContainer = ({
     }
 
     setSavedQuotes(quotes || []);
+  };
+
+  const handleCreateQuote = async () => {
+    if (!builderName || !jobName) {
+      toast({
+        title: "Error",
+        description: "Please fill in both Builder Name and Job Name before creating a quote",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newQuoteId = uuidv4();
+    const currentTimestamp = new Date().toISOString();
+
+    const { data: quote, error } = await supabase
+      .from('Quote')
+      .insert({
+        id: newQuoteId,
+        builderName,
+        jobName,
+        user_id: session?.user?.id,
+        createdAt: currentTimestamp,
+        updatedAt: currentTimestamp,
+      })
+      .select('quote_number')
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create quote",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    onQuoteSaved(quote.quote_number, newQuoteId);
+    toast({
+      title: "Success",
+      description: "Quote created successfully",
+    });
+    fetchSavedQuotes();
   };
 
   const handleLoadQuote = async () => {
@@ -214,6 +258,22 @@ const QuoteContainer = ({
           onBuilderNameChange={onBuilderNameChange}
           onJobNameChange={onJobNameChange}
         />
+
+        {!quoteId && (
+          <Button
+            onClick={handleCreateQuote}
+            variant="default"
+            className="w-full mt-4"
+          >
+            Create Quote
+          </Button>
+        )}
+
+        {quoteId && (
+          <div className="mt-4 p-4 bg-gray-700/50 rounded-lg">
+            <p className="text-white text-sm">Quote ID: {quoteId}</p>
+          </div>
+        )}
       </div>
       
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-700/50 hover:shadow-xl transition-shadow">
