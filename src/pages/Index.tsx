@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import QuoteInfo from "@/components/QuoteInfo";
 import WindowConfigurator, { WindowConfig } from "@/components/WindowConfigurator";
 import DoorConfigurator, { DoorConfig } from "@/components/DoorConfigurator";
@@ -16,16 +16,87 @@ const Index = () => {
   const session = useSession();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { id: quoteId } = useParams(); // Get quote ID from URL if it exists
   const [builderName, setBuilderName] = useState("");
   const [jobName, setJobName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [quoteNumber, setQuoteNumber] = useState<number>();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!session) {
       navigate("/login");
     }
   }, [session, navigate]);
+
+  // Load existing quote data if quoteId is provided
+  useEffect(() => {
+    const loadQuote = async () => {
+      if (!quoteId || !session) return;
+      
+      setLoading(true);
+      try {
+        // Fetch quote details
+        const { data: quote, error: quoteError } = await supabase
+          .from("Quote")
+          .select("*")
+          .eq("id", quoteId)
+          .maybeSingle();
+
+        if (quoteError) throw quoteError;
+        if (!quote) {
+          toast({
+            title: "Error",
+            description: "Quote not found",
+            variant: "destructive",
+          });
+          navigate("/");
+          return;
+        }
+
+        // Set quote details
+        setBuilderName(quote.builderName);
+        setJobName(quote.jobName);
+        setQuoteNumber(quote.quote_number);
+
+        // Fetch order items
+        const { data: orderItems, error: itemsError } = await supabase
+          .from("OrderItem")
+          .select("*")
+          .eq("quoteId", quoteId);
+
+        if (itemsError) throw itemsError;
+
+        // Transform order items to match the Item type
+        const transformedItems = orderItems.map((item): Item => ({
+          type: item.type as "window" | "door",
+          vendorStyle: item.style || "",
+          openingType: item.subStyle || "",
+          color: item.color || "",
+          customColor: item.customColor,
+          material: item.material || "",
+          width: item.width?.toString() || "",
+          height: item.height?.toString() || "",
+          style: item.style || "",
+          subOption: item.subStyle || "",
+          measurementGiven: "dlo", // Default value as it's not stored
+        }));
+
+        setItems(transformedItems);
+      } catch (error) {
+        console.error("Error loading quote:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load quote details",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadQuote();
+  }, [quoteId, session, navigate, toast]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -77,14 +148,24 @@ const Index = () => {
 
   const handleQuoteSaved = (newQuoteNumber: number) => {
     setQuoteNumber(newQuoteNumber);
-    // Clear the form after successful save
-    setBuilderName("");
-    setJobName("");
-    setItems([]);
+    // Only clear the form if we're not editing an existing quote
+    if (!quoteId) {
+      setBuilderName("");
+      setJobName("");
+      setItems([]);
+    }
   };
 
   if (!session) {
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 py-8 flex items-center justify-center">
+        <div className="text-white">Loading quote details...</div>
+      </div>
+    );
   }
 
   return (
@@ -97,7 +178,9 @@ const Index = () => {
             className="h-24 mb-6"
           />
           <div className="w-full flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">Window & Door Configurator</h1>
+            <h1 className="text-3xl font-bold text-white">
+              {quoteId ? "Edit Quote" : "Window & Door Configurator"}
+            </h1>
             <div className="space-x-4">
               <Button variant="outline" asChild>
                 <Link to="/">Dashboard</Link>
@@ -144,6 +227,7 @@ const Index = () => {
           items={items}
           session={session}
           onQuoteSaved={handleQuoteSaved}
+          quoteId={quoteId}
         />
       </div>
     </div>
